@@ -61,6 +61,11 @@ main = hspec $ do
         [ "% fn do"
         , "% end"
         ] `parsesTo` Call (Symbol "fn") (Block [])
+    it "parses function calls taking anonymous functions" $ do
+      unlines
+        [ "% fn :x do"
+        , "% end"
+        ] `parsesTo` Call (Symbol "fn") (Fn "x" [])
   describe "function" $ do
     let ?parser = sigil *> function
     it "parses empty functions" $ do
