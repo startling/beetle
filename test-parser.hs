@@ -9,9 +9,9 @@ import Control.Applicative
 import Test.Hspec
 -- trifecta
 import Text.Trifecta
--- tween
-import Tween.Abstract
-import Tween.Parse
+-- beetle
+import Beetle.Abstract
+import Beetle.Parse
 
 parsesTo :: (?parser :: Parser a, Eq a) => String -> a -> Bool
 a `parsesTo` b = toList (parseString ?parser mempty a) == [b]
@@ -109,4 +109,3 @@ main = hspec $ do
       "x y z" `parsesTo` Call (Symbol "x") (Call (Symbol "y") (Symbol "z"))
     it "parses nested application with parens" $ do
       "x (y z)" `parsesTo` Call (Symbol "x") (Call (Symbol "y") (Symbol "z"))
-

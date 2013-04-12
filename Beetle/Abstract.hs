@@ -1,4 +1,4 @@
-module Tween.Abstract where
+module Beetle.Abstract where
 -- text
 import Data.Text (Text)
 

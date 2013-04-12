@@ -1,4 +1,4 @@
-module Tween.Parse where
+module Beetle.Parse where
 -- base
 import Control.Applicative
 import Control.Monad
@@ -13,8 +13,8 @@ import qualified Text.Parser.Token.Highlight as H
 -- text
 import Data.Text (Text)
 import qualified Data.Text as T
--- tween
-import Tween.Abstract
+-- beetle
+import Beetle.Abstract
 
 equals :: TokenParsing m => m String
 equals = highlight H.Special $ symbol ":="
