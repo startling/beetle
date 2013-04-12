@@ -38,7 +38,7 @@ main = hspec $ do
         , "  % y := z"
         , "% end"
         ] `parsesTo` [Assignment "y" (Symbol "z")]
-  describe "top" $ do
+  describe "assignment" $ do
     let ?parser = sigil *> assignment
     it "parses assignment to symbols" $ do
       "% x := y" `parsesTo` ("x", Symbol "y")
