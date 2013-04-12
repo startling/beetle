@@ -38,6 +38,12 @@ main = hspec $ do
         , "  % y := z"
         , "% end"
         ] `parsesTo` [Assignment "y" (Symbol "z")]
+    it "parses blocks with calls within" $ do
+      unlines
+        [ "% do"
+        , "  % x y"
+        , "% end"
+        ] `parsesTo` [Splice (Call (Symbol "x") (Symbol "y"))]
   describe "assignment" $ do
     let ?parser = sigil *> assignment
     it "parses assignment to symbols" $ do
@@ -48,6 +54,8 @@ main = hspec $ do
     let ?parser = abstract
     it "parses string literals" $ do
       "\"abc\"" `parsesTo` Literal "abc"
+    it "parses unary application" $ do
+      "x y" `parsesTo` Call (Symbol "x") (Symbol "y")
   describe "function" $ do
     let ?parser = sigil *> function
     it "parses empty functions" $ do
@@ -55,3 +63,16 @@ main = hspec $ do
         [ "% :x do"
         , "% end"
         ] `parsesTo` Fn "x" []
+  describe "application" $ do
+    let ?parser = application
+    it "parses unary application" $ do
+      "x y" `parsesTo` Call (Symbol "x") (Symbol "y")
+    it "parses binary application" $ do
+      "x y, z" `parsesTo` Call (Call (Symbol "x") (Symbol "y")) (Symbol "z")
+    it "parses ternary application" $ do
+      "x y, z, a" `parsesTo` Call
+        (Call (Call (Symbol "x") (Symbol "y")) (Symbol "z")) (Symbol "a")
+    it "parses nested application" $ do
+      "x y z" `parsesTo` Call (Symbol "x") (Call (Symbol "y") (Symbol "z"))
+    it "parses nested application with parens" $ do
+      "x (y z)" `parsesTo` Call (Symbol "x") (Call (Symbol "y") (Symbol "z"))
