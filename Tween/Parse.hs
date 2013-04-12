@@ -72,4 +72,3 @@ abstract' = parens abstract
   <|> Block <$> block
   <|> Dict <$> dictionary
   <|> function
--- TODO: function applications
