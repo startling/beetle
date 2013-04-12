@@ -24,7 +24,8 @@ data Abstract
   )
 
 data Statement
-  = Assignment Text Abstract
+  = Reassignment Text Abstract
+  | Assignment Text Abstract
   | Splice Abstract
   | Chunk Text
   | Line
