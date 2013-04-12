@@ -48,4 +48,10 @@ main = hspec $ do
     let ?parser = abstract
     it "parses string literals" $ do
       "\"abc\"" `parsesTo` Literal "abc"
-
+  describe "function" $ do
+    let ?parser = sigil *> function
+    it "parses empty functions" $ do
+      unlines
+        [ "% :x do"
+        , "% end"
+        ] `parsesTo` Fn "x" []
