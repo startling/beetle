@@ -60,7 +60,7 @@ main = hspec $ do
         , "  % x"
         , "  abc"
         , "% end"
-        ] `parsesTo` [Splice (Symbol "a"), Chunk "abc"]
+        ] `parsesTo` [Splice (Symbol "x"), Chunk "abc"]
   describe "assignment" $ do
     let ?parser = sigil *> assignment
     it "parses assignment to symbols" $ do
@@ -109,3 +109,4 @@ main = hspec $ do
       "x y z" `parsesTo` Call (Symbol "x") (Call (Symbol "y") (Symbol "z"))
     it "parses nested application with parens" $ do
       "x (y z)" `parsesTo` Call (Symbol "x") (Call (Symbol "y") (Symbol "z"))
+
