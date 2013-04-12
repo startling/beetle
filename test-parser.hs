@@ -44,4 +44,8 @@ main = hspec $ do
       "% x := y" `parsesTo` ("x", Symbol "y")
     it "parses assignment to empty blocks" $ do
       "% x := do\n% end"`parsesTo` ("x", Block [])
+  describe "abstract" $ do
+    let ?parser = abstract
+    it "parses string literals" $ do
+      "\"abc\"" `parsesTo` Literal "abc"
 
