@@ -1,6 +1,6 @@
 % metadata :=
   { name  => "startling"
-  , title => "example tween game"
+  , title => "example game"
   , start => start
   }
 % state :=
@@ -12,7 +12,7 @@
 
   % field :name do
     % state.name := name
-    % switch second
+    % switch-to second
   % end
 % end
 
@@ -25,7 +25,7 @@
   % link do
     Check pockets.
   % end, do
-    % switch pockets
+    % switch-to pockets
   % end
 % end
 
