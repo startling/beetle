@@ -56,6 +56,11 @@ main = hspec $ do
       "% \"abc\"" `parsesTo` Literal "abc"
     it "parses unary application" $ do
       "% x y" `parsesTo` Call (Symbol "x") (Symbol "y")
+    it "parses function calls taking blocks" $ do
+      unlines
+        [ "% fn do"
+        , "% end"
+        ] `parsesTo` Call (Symbol "fn") (Block [])
   describe "function" $ do
     let ?parser = sigil *> function
     it "parses empty functions" $ do
