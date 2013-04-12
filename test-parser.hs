@@ -35,7 +35,7 @@ main = hspec $ do
     it "parses blocks with assignments within" $ do
       unlines
         [ "% do"
-        , "  % y := z"
+        , "  % y = z"
         , "% end"
         ] `parsesTo` [Assignment "y" (Symbol "z")]
     it "parses blocks with calls within" $ do
@@ -64,9 +64,9 @@ main = hspec $ do
   describe "assignment" $ do
     let ?parser = sigil *> assignment
     it "parses assignment to symbols" $ do
-      "% x := y" `parsesTo` ("x", Symbol "y")
+      "% x = y" `parsesTo` ("x", Symbol "y")
     it "parses assignment to empty blocks" $ do
-      "% x := do\n% end"`parsesTo` ("x", Block [])
+      "% x = do\n% end"`parsesTo` ("x", Block [])
   describe "abstract" $ do
     let ?parser = sigil *> abstract
     it "parses string literals" $ do
