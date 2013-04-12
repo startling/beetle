@@ -46,7 +46,7 @@ statement = empty
   <|> (try $ sigil *> (uncurry Assignment <$> assignment))
   <|> (try $ sigil *> (Splice <$> abstract))
   <|> (try $ newline *> return Line)
-  <|> (try $ spaces *> (Chunk . T.pack <$> many (noneOf "\n")) <* newline)
+  <|> (try $ spaces *> (Chunk . T.pack <$> manyTill anyChar newline) <* spaces)
 
 assignment :: (Monad m, TokenParsing m) => m (Text, Abstract)
 assignment = (,) <$> identifier <* equals <*> abstract
