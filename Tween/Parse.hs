@@ -37,8 +37,9 @@ reserved :: (Monad m, TokenParsing m) => String -> m ()
 reserved = reserve idStyle
 
 block :: (Monad m, TokenParsing m) => m [Statement]
-block = reserved "do" *> many statement <* try end where
+block = reserved "do" *> statements where
   end = sigil *> reserved "end"
+  statements = [] <$ try end <|> (:) <$> statement <*> statements
 
 statement :: (Monad f, TokenParsing f) => f Statement
 statement = empty
@@ -63,6 +64,3 @@ abstract = Symbol <$> identifier
   <|> Dict <$> dictionary
   <|> function
 -- TODO: function applications
-
-top :: (Monad f, TokenParsing f) => f (Text, Abstract)
-top = sigil *> assignment
