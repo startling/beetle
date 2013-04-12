@@ -1,0 +1,37 @@
+% metadata :=
+  { name  => "startling"
+  , title => "example tween game"
+  , start => start
+  }
+% state :=
+  { name => nothing
+  }
+
+% start := do
+  What is your name?
+
+  % field :name do
+    % state.name := name
+    % switch second
+  % end
+% end
+
+% second := do
+  Your name is `state.name`. You feel a sense of impending doom. You
+  are carrying a heavy book printed in a language you can't read. Your
+  pockets are overfull; when your hand brushes against them, something
+  sharp briefly sticks into your thigh.
+
+  % link do
+    Check pockets.
+  % and
+    % switch pockets
+  % end
+% end
+
+% pockets := do
+  You gingerly pull something from your pocket, careful to avoid the
+  sharp bits. You can see it in the sharp torchlight, but only barely:
+  it's a tiny unbleached skull, probably from a small rodent. You're
+  subconsciously surprised by how light it is.
+% end
