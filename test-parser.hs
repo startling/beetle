@@ -51,11 +51,11 @@ main = hspec $ do
     it "parses assignment to empty blocks" $ do
       "% x := do\n% end"`parsesTo` ("x", Block [])
   describe "abstract" $ do
-    let ?parser = abstract
+    let ?parser = sigil *> abstract
     it "parses string literals" $ do
-      "\"abc\"" `parsesTo` Literal "abc"
+      "% \"abc\"" `parsesTo` Literal "abc"
     it "parses unary application" $ do
-      "x y" `parsesTo` Call (Symbol "x") (Symbol "y")
+      "% x y" `parsesTo` Call (Symbol "x") (Symbol "y")
   describe "function" $ do
     let ?parser = sigil *> function
     it "parses empty functions" $ do
