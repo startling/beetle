@@ -57,8 +57,17 @@ dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> abstract
 function :: (Monad m, TokenParsing m) => m Abstract
 function = Fn <$> (char ':' *> identifier) <*> block
 
-abstract :: (Monad m, TokenParsing m) => m Abstract
-abstract = Symbol <$> identifier
+application :: (Monad f, TokenParsing f) => f Abstract
+application = apply <$> abstract' <*> commaSep1 abstract where
+  apply a (b: bs) = apply (Call a b) bs
+  apply a [] = a
+
+abstract :: (Monad f, TokenParsing f) => f Abstract
+abstract = try application <|> abstract'
+
+abstract' :: (Monad f, TokenParsing f) => f Abstract
+abstract' = parens abstract
+  <|> Symbol <$> identifier
   <|> Literal . T.pack <$> stringLiteral
   <|> Block <$> block
   <|> Dict <$> dictionary
