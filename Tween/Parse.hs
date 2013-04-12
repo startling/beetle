@@ -27,7 +27,9 @@ sigil = highlight H.Special $ symbol "%"
 
 idStyle :: CharParsing m => IdentifierStyle m
 idStyle = IdentifierStyle "identifier"
-  letter alphaNum reserved H.Identifier H.Special where
+  (chars <|> letter) (chars <|> alphaNum)
+  reserved H.Identifier H.Special where
+    chars = oneOf ".-_"
     reserved = fromList ["do", "end"]
 
 identifier :: (Monad f, TokenParsing f) => f Text
