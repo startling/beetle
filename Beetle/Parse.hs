@@ -16,8 +16,11 @@ import qualified Data.Text as T
 -- beetle
 import Beetle.Abstract
 
-equals :: TokenParsing m => m String
-equals = highlight H.Special $ symbol ":="
+assign :: TokenParsing m => m String
+assign = highlight H.Special $ symbol "="
+
+reassign :: TokenParsing m => m String
+reassign = highlight H.Special $ symbol ":="
 
 arrow :: TokenParsing m => m String
 arrow = highlight H.Special $ symbol "=>"
@@ -46,12 +49,16 @@ block = reserved "do" *> statements where
 statement :: (Monad f, TokenParsing f) => f Statement
 statement = empty
   <|> (try $ sigil *> (uncurry Assignment <$> assignment))
+  <|> (try $ sigil *> (uncurry Reassignment <$> reassignment))
   <|> (try $ sigil *> (Splice <$> abstract))
   <|> (try $ newline *> return Line)
   <|> (try $ spaces *> (Chunk . T.pack <$> manyTill anyChar newline) <* spaces)
 
 assignment :: (Monad m, TokenParsing m) => m (Text, Abstract)
-assignment = (,) <$> identifier <* equals <*> abstract
+assignment = (,) <$> identifier <* assign <*> abstract
+
+reassignment :: (Monad f, TokenParsing f) => f (Text, Abstract)
+reassignment = (,) <$> identifier <* reassign <*> abstract
 
 dictionary :: (Monad m, TokenParsing m) => m [(Text, Abstract)]
 dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> abstract
