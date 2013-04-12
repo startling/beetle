@@ -58,17 +58,19 @@ function :: (Monad m, TokenParsing m) => m Abstract
 function = Fn <$> (char ':' *> identifier) <*> block
 
 application :: (Monad f, TokenParsing f) => f Abstract
-application = apply <$> abstract' <*> commaSep1 abstract where
+application = apply <$> abstractLine <*> commaSep1 abstract where
   apply a (b: bs) = apply (Call a b) bs
   apply a [] = a
 
 abstract :: (Monad f, TokenParsing f) => f Abstract
-abstract = try application <|> abstract'
+abstract = try application <|> parens abstract <|> abstract'
 
 abstract' :: (Monad f, TokenParsing f) => f Abstract
-abstract' = parens abstract
-  <|> Symbol <$> identifier
+abstract' = Symbol <$> identifier
   <|> Literal . T.pack <$> stringLiteral
   <|> Block <$> block
   <|> Dict <$> dictionary
   <|> function
+
+abstractLine :: (Monad f, TokenParsing f) => f Abstract
+abstractLine = parens abstract <|> runUnlined abstract'
