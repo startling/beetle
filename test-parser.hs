@@ -33,7 +33,7 @@ main = hspec $ do
     it "parses empty blocks" $ do
       "% do\n% end" `parsesTo` []
   describe "top" $ do
-    let ?parser = top
+    let ?parser = sigil *> assignment
     it "parses assignment to symbols" $ do
       "% x := y" `parsesTo` ("x", Symbol "y")
     it "parses assignment to empty blocks" $ do
@@ -43,5 +43,5 @@ main = hspec $ do
         [ "% x := do"
         , "  % y := z"
         , "% end"
-        ] `parsesTo` ("x", Block [Assignment "x" (Symbol "z")])
+        ] `parsesTo` ("x", Block [Assignment "y" (Symbol "z")])
 
