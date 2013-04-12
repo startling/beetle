@@ -3,7 +3,7 @@ module Tween.Abstract where
 import Data.Text (Text)
 
 data Declaration
-  = Declaration String Abstract
+  = Declaration Text Abstract
   deriving
   ( Eq
   , Ord
