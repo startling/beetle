@@ -8,6 +8,7 @@ import Data.HashSet (fromList)
 -- parsers
 import Text.Parser.Char
 import Text.Parser.Token
+import Text.Parser.LookAhead
 import Text.Parser.Combinators
 import qualified Text.Parser.Token.Highlight as H
 -- text
@@ -52,7 +53,14 @@ statement = empty
   <|> (try $ sigil *> (uncurry Reassignment <$> reassignment))
   <|> (try $ sigil *> (Splice <$> abstract))
   <|> (try $ newline *> return Line)
-  <|> (try $ spaces *> (Chunk . T.pack <$> manyTill anyChar newline) <* spaces)
+  <|> (try $ Paragraph . map Left <$> paragraph)
+
+paragraph :: (Monad f, TokenParsing f) => f [Text]
+paragraph = (:) <$> line <*> (maybe [] id <$> recur) where
+  line :: TokenParsing f => f Text
+  line = spaces *> (T.pack <$> manyTill anyChar newline) <* spaces
+  recur :: (Monad f, TokenParsing f) => f (Maybe [Text])
+  recur = optional (notFollowedBy sigil *> paragraph)
 
 assignment :: (Monad m, TokenParsing m) => m (Text, Abstract)
 assignment = (,) <$> identifier <* assign <*> abstract
