@@ -7,6 +7,12 @@ function switchto (element, fn) {
   fn(element);
 };
 
+function paragraph (element, string) {
+  var $par = $("<p/>");
+  $par.append(document.createTextNode(string));
+  element.append($par);
+}
+
 function field (element, fn) {
   var $form = $("<form/>");
   var $text = $("<input/>", {type : "text"});
