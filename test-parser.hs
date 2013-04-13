@@ -70,9 +70,9 @@ assignments = describe "assignment" $ do
   it "parses simple assignment" $ do
     "% x = y" `parsesTo` ("x", Symbol "y")
 
-abstracts :: Spec
-abstracts = describe "abstract" $ do
-  let ?parser = sigil *> abstract
+expressions :: Spec
+expressions = describe "expression" $ do
+  let ?parser = sigil *> expression
   it "parses string literals" $ do
     "% \"abc\"" `parsesTo` Literal "abc"
   it "parses unary application" $ do
@@ -128,7 +128,7 @@ main = hspec $ sequence_
   [ dictionaries
   , blocks
   , assignments
-  , abstracts
+  , expressions
   , functions
   , applications
   ]

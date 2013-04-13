@@ -33,7 +33,7 @@ mangle t = let m = T.concatMap each t in
       '-' -> "_"; '_' -> "__"; c -> T.singleton c;
     
 -- | Compile a Beetle expression to a Javascript one.
-expression :: Expression -> B.Abstract -> Expression
+expression :: Expression -> B.Expression -> Expression
 expression e (B.Symbol t) = if t `elem` functions
   then runtime $ mangle t else Variable $ mangle t
   where

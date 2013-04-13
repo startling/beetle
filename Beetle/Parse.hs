@@ -51,7 +51,7 @@ statement :: (Monad f, TokenParsing f) => f Statement
 statement = empty
   <|> (try $ sigil *> (uncurry Assignment <$> assignment))
   <|> (try $ sigil *> (uncurry Reassignment <$> reassignment))
-  <|> (try $ sigil *> (Splice <$> abstract))
+  <|> (try $ sigil *> (Splice <$> expression))
   <|> (try $ Paragraph . return . Left . T.unwords <$> paragraph)
 
 paragraph :: (Monad f, TokenParsing f) => f [Text]
@@ -61,40 +61,40 @@ paragraph = (:) <$> line <*> (maybe mempty id <$> recur) where
   recur :: (Monad f, TokenParsing f) => f (Maybe [Text])
   recur = optional (notFollowedBy sigil *> paragraph)
 
-assignment :: (Monad m, TokenParsing m) => m (Text, Abstract)
-assignment = (,) <$> identifier <* assign <*> abstract
+assignment :: (Monad m, TokenParsing m) => m (Text, Expression)
+assignment = (,) <$> identifier <* assign <*> expression
 
-reassignment :: (Monad f, TokenParsing f) => f (Text, Abstract)
-reassignment = (,) <$> identifier <* reassign <*> abstract
+reassignment :: (Monad f, TokenParsing f) => f (Text, Expression)
+reassignment = (,) <$> identifier <* reassign <*> expression
 
-dictionary :: (Monad m, TokenParsing m) => m [(Text, Abstract)]
-dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> abstract
+dictionary :: (Monad m, TokenParsing m) => m [(Text, Expression)]
+dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> expression
 
-function :: (Monad m, TokenParsing m) => m Abstract
+function :: (Monad m, TokenParsing m) => m Expression
 function = Fn <$> (char ':' *> identifier) <*> block
 
-withAttribute :: (Monad f, TokenParsing f) => f Abstract -> f Abstract
+withAttribute :: (Monad f, TokenParsing f) => f Expression -> f Expression
 withAttribute x = foldl Attribute <$> x
   <*> many (char '.' *> identifier)
 
-application :: (Monad f, TokenParsing f) => f Abstract
-application = apply <$> abstractLine <*> commaSep1 abstract where
+application :: (Monad f, TokenParsing f) => f Expression
+application = apply <$> expressionLine <*> commaSep1 expression where
   apply a (b: bs) = apply (Call a b) bs
   apply a [] = a
 
-abstract :: (Monad f, TokenParsing f) => f Abstract
-abstract = try application <|> withAttribute (parens abstract) <|> abstract'
+expression :: (Monad f, TokenParsing f) => f Expression
+expression = try application <|> withAttribute (parens expression) <|> expression'
 
-abstract' :: (Monad f, TokenParsing f) => f Abstract
-abstract' = withAttribute $
+expression' :: (Monad f, TokenParsing f) => f Expression
+expression' = withAttribute $
       Symbol <$> identifier
   <|> Literal . T.pack <$> stringLiteral
   <|> Block <$> block
   <|> Dict <$> dictionary
   <|> function
 
-abstractLine :: (Monad f, TokenParsing f) => f Abstract
-abstractLine = parens abstract <|> runUnlined abstract'
+expressionLine :: (Monad f, TokenParsing f) => f Expression
+expressionLine = parens expression <|> runUnlined expression'
 
 dec :: (Monad f, TokenParsing f) => f Declaration
 dec = sigil *> (uncurry Declaration <$> assignment)

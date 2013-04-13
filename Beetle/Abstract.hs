@@ -3,17 +3,17 @@ module Beetle.Abstract where
 import Data.Text (Text)
 
 data Declaration
-  = Declaration Text Abstract
+  = Declaration Text Expression
   deriving
   ( Eq
   , Ord
   , Show
   )
 
-data Abstract
-  = Attribute Abstract Text
-  | Dict [(Text, Abstract)]
-  | Call Abstract Abstract
+data Expression
+  = Attribute Expression Text
+  | Dict [(Text, Expression)]
+  | Call Expression Expression
   | Fn Text [Statement]
   | Block [Statement]
   | Literal Text
@@ -25,10 +25,10 @@ data Abstract
   )
 
 data Statement
-  = Paragraph [Either Text Abstract]
-  | Reassignment Text Abstract
-  | Assignment Text Abstract
-  | Splice Abstract
+  = Paragraph [Either Text Expression]
+  | Reassignment Text Expression
+  | Assignment Text Expression
+  | Splice Expression
   deriving
   ( Eq
   , Ord
