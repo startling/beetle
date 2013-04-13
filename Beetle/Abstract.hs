@@ -28,7 +28,6 @@ data Statement
   | Reassignment Text Abstract
   | Assignment Text Abstract
   | Splice Abstract
-  | Chunk Text
   | Line
   deriving
   ( Eq
