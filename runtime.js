@@ -41,7 +41,7 @@ var beetle = {
     f(element);
   },
 
-  if_: function (_, c) {
+  $if: function (_, c) {
     return function (_, f) {
       return function (element, g) {
         if (c) { f(element); } else { g(element); };
