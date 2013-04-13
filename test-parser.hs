@@ -44,23 +44,23 @@ main = hspec $ do
         , "  % x y"
         , "% end"
         ] `parsesTo` [Splice (Call (Symbol "x") (Symbol "y"))]
-    it "parses things after chunks of texts." $ do
+    it "parses things after paragraphs." $ do
       unlines
         [ "% do"
         , "  some text"
         , "  % a b"
         , "% end"
         ] `parsesTo`
-        [ Chunk "some text"
+        [ Paragraph [Left "some text"]
         , Splice (Call (Symbol "a") (Symbol "b"))
         ]
-    it "parses chunks of text after calls correctly" $ do
+    it "parses paragraphs after calls correctly" $ do
       unlines
         [ "% do"
         , "  % x"
         , "  abc"
         , "% end"
-        ] `parsesTo` [Splice (Symbol "x"), Chunk "abc"]
+        ] `parsesTo` [Splice (Symbol "x"), Paragraph [Left "abc"]]
   describe "assignment" $ do
     let ?parser = sigil *> assignment
     it "parses assignment to symbols" $ do
