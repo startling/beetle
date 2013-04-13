@@ -83,3 +83,7 @@ abstract' = Symbol <$> identifier
 
 abstractLine :: (Monad f, TokenParsing f) => f Abstract
 abstractLine = parens abstract <|> runUnlined abstract'
+
+dec :: (Monad f, TokenParsing f) => f Declaration
+dec = sigil *> (uncurry Declaration <$> assignment)
+
