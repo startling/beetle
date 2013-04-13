@@ -53,10 +53,10 @@ statement = empty
   <|> (try $ sigil *> (uncurry Reassignment <$> reassignment))
   <|> (try $ sigil *> (Splice <$> abstract))
   <|> (try $ newline *> return Line)
-  <|> (try $ Paragraph . map Left <$> paragraph)
+  <|> (try $ Paragraph . return . Left . T.unwords <$> paragraph)
 
 paragraph :: (Monad f, TokenParsing f) => f [Text]
-paragraph = (:) <$> line <*> (maybe [] id <$> recur) where
+paragraph = (:) <$> line <*> (maybe mempty id <$> recur) where
   line :: TokenParsing f => f Text
   line = spaces *> (T.pack <$> manyTill anyChar newline) <* spaces
   recur :: (Monad f, TokenParsing f) => f (Maybe [Text])
