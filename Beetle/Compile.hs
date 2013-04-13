@@ -21,6 +21,7 @@ expression e (B.Symbol t) = case t of
     functions :: [Text]
     functions = ["paragraph", "field", "link", "exec"]
     -- TODO: generalized transform to js-safe identifiers
+expression e (B.Attribute a s) = Attribute (expression e a) s
 expression e (B.Literal t) = Literal t
 expression e (B.Call a b) = Call (expression e a) [e, expression e b]
 expression e (B.Block ss) = Function ["element"]
