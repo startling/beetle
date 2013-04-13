@@ -41,7 +41,8 @@ printExpression (Operator t a b) = "((" <> printExpression a <> ") "
   <> t <> " (" <> printExpression b <> "))"
 
 data Statement
-  = Expression Expression
+  = Return Statement
+  | Expression Expression
   | Reassign Text Expression
   | Var Text (Maybe Expression)
   deriving
@@ -53,6 +54,7 @@ data Statement
 type Block = [Statement]
 
 printStatement :: Statement -> Text
+printStatement (Return e) = "return " <> printStatement e
 printStatement (Expression e) = printExpression e <> ";"
 printStatement (Reassign t e) = t <> " = " <> printExpression e <> ";"
 printStatement (Var t Nothing) = "var " <> t <> ";"
