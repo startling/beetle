@@ -11,7 +11,8 @@ data Declaration
   )
 
 data Abstract
-  = Dict [(Text, Abstract)]
+  = Attribute Abstract Text
+  | Dict [(Text, Abstract)]
   | Call Abstract Abstract
   | Fn Text [Statement]
   | Block [Statement]
