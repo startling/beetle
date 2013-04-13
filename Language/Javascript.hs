@@ -29,7 +29,7 @@ printExpression (Function ps ss) = "function ("
   <> T.intercalate ", " ps <> "){\n"
   <> T.intercalate "\n" (map printStatement ss) <> "\n}"
 printExpression (Object _) = "{ todo: \"this\" }"
-printExpression (Attribute e t) = printExpression e <> "." <> t
+printExpression (Attribute e t) = "(" <> printExpression e <> ")." <> t
 printExpression (Array _) = "[ \"todo\" ]"
 printExpression (Number _) = "1337"
 printExpression (Variable t) = t
