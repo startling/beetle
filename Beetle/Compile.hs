@@ -23,6 +23,6 @@ statement :: Expression -> B.Statement -> Statement
 statement e (B.Reassignment m a) = Reassign m $ expression e a
 statement e (B.Assignment m a) = Var m . Just $ expression e a
 statement e (B.Chunk t) = Expression $ Call (Attribute e "add") [Literal t]
-statement e (B.Splice x) = Expression $ Call (Attribute e "add") [Literal ":("]
 statement e (B.Line) = Expression $ Call (Attribute e "add") [Literal "\n"]
+statement e (B.Splice x) = Expression $ expression e x
 
