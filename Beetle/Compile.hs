@@ -24,8 +24,11 @@ expression e (B.Symbol t) = case t of
 expression e (B.Attribute a s) = Attribute (expression e a) s
 expression e (B.Literal t) = Literal t
 expression e (B.Call a b) = Call (expression e a) [e, expression e b]
-expression e (B.Block ss) = Function ["element"]
-  $ map (statement $ Variable "element") ss
+expression e (B.Block ss) = Function ["element"] . onLast Return
+  $ map (statement $ Variable "element") ss where
+    onLast _ [] = []
+    onLast f (a : []) = f a : []
+    onLast f (a : as) = a : onLast f as
 expression e (B.Fn p ss) = Function ["element", p]
   $ map (statement $ Variable "element") ss
 expression e (B.Dict ss) = Object (map (fmap $ expression e) ss)
