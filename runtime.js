@@ -5,7 +5,7 @@ $(document).ready(function () {
 function switchto (element, fn) {
   element.empty();
   fn(element);
-}
+};
 
 function field (element, fn) {
   var $form = $("<form/>");
@@ -16,22 +16,23 @@ function field (element, fn) {
     return false;
   });
   element.append($form);
-}
+};
 
 function link (_, f) {
   return function (element, g) {
-    var $a = $('<a>');
+    var $a = $('<a/>');
+    $a.addClass("link");
     $a.click(function () {
       g(element);
     });
     f($a);
     element.append($a);
-  }
-}
+  };
+};
 
 function exec (element, f) {
   f(element);
-}
+};
 
 function if_ (_, c) {
   return function (_, f) {
@@ -39,4 +40,4 @@ function if_ (_, c) {
       if (c) { f(element); } else { g(element); };
     }
   }
-}
+};
