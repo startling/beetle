@@ -2,6 +2,8 @@
 module Language.Javascript where
 -- base
 import Data.Monoid
+import Data.Char
+import Text.Printf
 -- text
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -36,7 +38,7 @@ printExpression (Attribute e t) = "(" <> printExpression e <> ")." <> t
 printExpression (Array _) = "[ \"todo\" ]"
 printExpression (Number _) = "1337"
 printExpression (Variable t) = t
-printExpression (Literal t) = "\"" <> t <> "\"" -- escape!
+printExpression (Literal t) = "\"" <> escape t <> "\""
 printExpression (Operator t a b) = "((" <> printExpression a <> ") "
   <> t <> " (" <> printExpression b <> "))"
 
@@ -60,6 +62,14 @@ printStatement (Reassign t e) = t <> " = " <> printExpression e <> ";"
 printStatement (Var t Nothing) = "var " <> t <> ";"
 printStatement (Var t (Just e)) = "var " <> t
   <> " = " <> printExpression e <> ";"
+
+escape :: Text -> Text
+escape = T.concatMap $ \x -> case x of
+  '"' -> "\\\""; '\n' -> "\\n"; '\t' -> "\\t"; '\r' -> "\\r";
+  '\b' -> "\\b"; '\f' -> "\\f"; '\v' -> "\\v"; '\0' -> "\\0";
+  '\\' -> "\\\\";
+  c -> if isPrint c then T.singleton c
+    else T.pack $ printf "\\u%04x" $ ord c
 
 keywords :: [Text]
 keywords =
