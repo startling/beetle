@@ -2,9 +2,10 @@ body {
     font-family: Georgia, Palatino, Serif;
 }
 
-.link {
+a {
     text-decoration: underline;
     color: #a00;
+    cursor: pointer;
 }
 
 #content {
