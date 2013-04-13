@@ -29,8 +29,11 @@ expression e (B.Block ss) = Function ["element"] . onLast Return
     onLast _ [] = []
     onLast f (a : []) = f a : []
     onLast f (a : as) = a : onLast f as
-expression e (B.Fn p ss) = Function ["element", p]
-  $ map (statement $ Variable "element") ss
+expression e (B.Fn p ss) = Function ["element", p] . onLast Return
+  $ map (statement $ Variable "element") ss where
+    onLast _ [] = []
+    onLast f (a : []) = f a : []
+    onLast f (a : as) = a : onLast f as
 expression e (B.Dict ss) = Object (map (fmap $ expression e) ss)
 
 statement :: Expression -> B.Statement -> Statement
