@@ -24,7 +24,8 @@ data Abstract
   )
 
 data Statement
-  = Reassignment Text Abstract
+  = Paragraph [Either Text Abstract]
+  | Reassignment Text Abstract
   | Assignment Text Abstract
   | Splice Abstract
   | Chunk Text
