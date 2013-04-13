@@ -52,7 +52,6 @@ statement = empty
   <|> (try $ sigil *> (uncurry Assignment <$> assignment))
   <|> (try $ sigil *> (uncurry Reassignment <$> reassignment))
   <|> (try $ sigil *> (Splice <$> abstract))
-  <|> (try $ newline *> return Line)
   <|> (try $ Paragraph . return . Left . T.unwords <$> paragraph)
 
 paragraph :: (Monad f, TokenParsing f) => f [Text]

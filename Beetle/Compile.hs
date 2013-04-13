@@ -27,6 +27,4 @@ statement e (B.Paragraph ts) = Expression $ Call (Variable "paragraph")
   , foldr (Operator "+") (Literal "")
      $ map (either Literal $ expression e) ts
   ]
-statement e (B.Line) = Expression $ Call (Attribute e "append")
-  [Call (Attribute (Variable "document") "createTextNode") [Literal "\n"]]
 statement e (B.Splice x) = Expression $ expression e x
