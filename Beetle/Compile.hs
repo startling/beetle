@@ -24,7 +24,12 @@ statement e (B.Reassignment m a) = Reassign m $ expression e a
 statement e (B.Assignment m a) = Var m . Just $ expression e a
 statement e (B.Chunk t) = Expression $ Call (Attribute e "append")
   [Call (Attribute (Variable "document") "createTextNode") [Literal t]]
+statement e (B.Paragraph ts) = Expression $ Call (Attribute e "append")
+ [ Call (Attribute (Variable "document") "createTextNode")
+   [ foldr (Operator "+") (Literal "")
+     $ map (either Literal $ expression e) ts
+   ]
+ ]
 statement e (B.Line) = Expression $ Call (Attribute e "append")
   [Call (Attribute (Variable "document") "createTextNode") [Literal "\n"]]
 statement e (B.Splice x) = Expression $ expression e x
-
