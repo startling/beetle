@@ -89,6 +89,11 @@ main = hspec $ do
         , "% end, do"
         , "% end"
         ] `parsesTo` Call (Call (Symbol "fn") (Block [])) (Block [])
+    it "parses namespaced names correctly" $ do
+      "% hello.world" `parsesTo` Attribute (Symbol "hello") "world"
+    it "parses namedspace parenthesized things correctly" $ do
+      "% (fn a).world" `parsesTo`
+        Attribute (Call (Symbol "fn") (Symbol "a")) "world"
   describe "function" $ do
     let ?parser = sigil *> function
     it "parses empty functions" $ do
