@@ -15,6 +15,7 @@ data Expression
   | Object [(Text, Expression)]
   | Function [Text] [Statement]
   | Call Expression [Expression]
+  | Operator Text Expression Expression
   deriving
   ( Eq
   , Ord
@@ -33,6 +34,8 @@ printExpression (Array _) = "[ \"todo\" ]"
 printExpression (Number _) = "1337"
 printExpression (Variable t) = t
 printExpression (Literal t) = "\"" <> t <> "\"" -- escape!
+printExpression (Operator t a b) = "((" <> printExpression a <> ") "
+  <> t <> " (" <> printExpression b <> "))"
 
 data Statement
   = Expression Expression
