@@ -27,19 +27,22 @@ import qualified Text.Blaze.Html5.Attributes as A
 main :: IO ()
 main = do
   runtime <- T.readFile "runtime.js"
+  css <- T.readFile "style.css"
   d <- parseFromFile (many dec) "examples/example.beetle"
   e <- maybe (return []) return $ d
   let js = T.intercalate "\n\n" . map
        (printStatement . declaration (Variable "fuck")) $ e
-  let h = html $ T.intercalate "\n\n" [runtime, js]
+  let h = html css $ T.intercalate "\n\n" [runtime, js]
   writeFile "out.html" $ renderHtml h
 
 -- An html template.
-html :: Text -> Html
-html js = B.docTypeHtml $ do
+html :: Text -> Text -> Html
+html css js = B.docTypeHtml $ do
   B.head $ do
     B.meta ! A.charset "utf-8"
     B.title "beetle game"
+    B.style ( preEscapedText css
+      ) ! A.type_ "text/css"
     B.script (return ())
       ! A.src "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
     B.script
