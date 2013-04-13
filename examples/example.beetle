@@ -12,7 +12,7 @@
 
   % field :name do
     % state.name := name
-    % switch-to second
+    % switchto second
   % end
 % end
 
@@ -25,7 +25,7 @@
   % link do
     Check pockets.
   % end, do
-    % switch-to pockets
+    % switchto pockets
   % end
 % end
 
