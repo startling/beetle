@@ -1,0 +1,15 @@
+body {
+    font-family: Georgia, Palatino, Serif;
+}
+
+.link {
+    text-decoration: underline;
+    color: #a00;
+}
+
+
+#thing {
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
