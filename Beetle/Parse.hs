@@ -52,15 +52,22 @@ statement = empty
   <|> (try $ sigil *> (uncurry Assignment <$> assignment))
   <|> (try $ sigil *> (uncurry Reassignment <$> reassignment))
   <|> (try $ sigil *> (Splice <$> expression))
-  <|> (try $ Paragraph . return . Left . T.unwords <$> paragraph)
+  <|> spaces *> (Paragraph <$> paragraph)
 
-paragraph :: (Monad f, TokenParsing f) => f [Text]
-paragraph = (:) <$> line <*> (maybe mempty id <$> recur) where
-  line :: TokenParsing f => f Text
-  line = spaces *> (T.pack <$> manyTill anyChar newline) <* spaces
-  recur :: (Monad f, TokenParsing f) => f (Maybe [Text])
-  recur = optional (notFollowedBy sigil *> paragraph)
-
+paragraph :: (Monad f, TokenParsing f) => f [Either Text Expression]
+paragraph = connect <$> sepBy1
+  ((Left . T.pack <$> line) <|> (Right <$> splice))
+  (notFollowedBy sigil) where
+    splice :: (Monad m, TokenParsing m) => m Expression
+    splice = nesting $ between (char '`') (char '`') $ expression
+    line :: CharParsing f => f [Char]
+    line = some (noneOf "`\n") <* spaces
+    -- concatenate adjacent Left Texts.
+    connect :: [Either Text Expression] -> [Either Text Expression]
+    connect [] = []
+    connect (Left a : Left b : cs) = Left (a <> b) : connect cs
+    connect (a : bs) = a : connect bs
+  
 assignment :: (Monad m, TokenParsing m) => m (Text, Expression)
 assignment = (,) <$> identifier <* assign <*> expression
 
