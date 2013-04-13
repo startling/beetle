@@ -123,6 +123,12 @@ applications = describe "application" $ do
       , "% end"
       ] `parsesTo` Call (Symbol "fn") (Block [])
 
+statements = describe "statement" $ do
+  let ?parser = statement
+  it "handles splices correctly" $ do
+    "abc `d` e f" `parsesTo` Paragraph
+      [Left "abc ", Right (Symbol "d"), Left " e f" ]
+
 main :: IO ()
 main = hspec $ sequence_
   [ dictionaries
@@ -131,4 +137,5 @@ main = hspec $ sequence_
   , expressions
   , functions
   , applications
+  , statements
   ]
