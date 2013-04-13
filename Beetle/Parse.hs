@@ -33,7 +33,7 @@ idStyle :: CharParsing m => IdentifierStyle m
 idStyle = IdentifierStyle "identifier"
   (chars <|> letter) (chars <|> alphaNum)
   reserved H.Identifier H.Special where
-    chars = oneOf ".-_"
+    chars = oneOf "-_"
     reserved = fromList ["do", "end"]
 
 identifier :: (Monad f, TokenParsing f) => f Text
@@ -73,16 +73,21 @@ dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> abstract
 function :: (Monad m, TokenParsing m) => m Abstract
 function = Fn <$> (char ':' *> identifier) <*> block
 
+withAttribute :: (Monad f, TokenParsing f) => f Abstract -> f Abstract
+withAttribute x = foldl Attribute <$> x
+  <*> many (char '.' *> identifier)
+
 application :: (Monad f, TokenParsing f) => f Abstract
 application = apply <$> abstractLine <*> commaSep1 abstract where
   apply a (b: bs) = apply (Call a b) bs
   apply a [] = a
 
 abstract :: (Monad f, TokenParsing f) => f Abstract
-abstract = try application <|> parens abstract <|> abstract'
+abstract = try application <|> withAttribute (parens abstract) <|> abstract'
 
 abstract' :: (Monad f, TokenParsing f) => f Abstract
-abstract' = Symbol <$> identifier
+abstract' = withAttribute $
+      Symbol <$> identifier
   <|> Literal . T.pack <$> stringLiteral
   <|> Block <$> block
   <|> Dict <$> dictionary
