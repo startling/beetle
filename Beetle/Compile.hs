@@ -2,6 +2,7 @@
 module Beetle.Compile where
 -- text
 import Data.Text (Text)
+import qualified Data.Text as T
 -- beetle
 import qualified Beetle.Abstract as B
 import Language.Javascript
@@ -23,16 +24,21 @@ function ps ss = Function ("element":ps) . onLast Return
 runtime :: Text -> Expression
 runtime = Attribute (Variable "beetle")
 
+-- | Transform a valid Beetle identifier to a valid Javascript one.
+mangle :: Text -> Text
+mangle t = let m = T.concatMap each t in
+  if m `notElem` keywords then m else T.cons '$' m where
+    each :: Char -> Text
+    each c = case c of
+      '-' -> "_"; '_' -> "__"; c -> T.singleton c;
+    
 -- | Compile a Beetle expression to a Javascript one.
 expression :: Expression -> B.Abstract -> Expression
-expression e (B.Symbol t) = case t of
-    "switch-to" -> runtime "switch_to"
-    "if" -> runtime "if_"
-    t -> if t `elem` functions then runtime t else Variable t
+expression e (B.Symbol t) = if t `elem` functions
+  then runtime $ mangle t else Variable $ mangle t
   where
     functions :: [Text]
-    functions = ["paragraph", "field", "link", "exec"]
-    -- TODO: generalized transform to js-safe identifiers
+    functions = ["paragraph", "field", "link", "exec", "switch-to", "if"]
 expression e (B.Attribute a s) = Attribute (expression e a) s
 expression e (B.Literal t) = Literal t
 expression e (B.Call a b) = Call (expression e a) [e, expression e b]
