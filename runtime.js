@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  start($("#thing"));
+  start($("#content"));
 });
 
 function switchto (element, fn) {

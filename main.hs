@@ -49,4 +49,4 @@ html css js = B.docTypeHtml $ do
       ( preEscapedText js
       ) ! A.type_ "text/javascript"
   B.body $ do
-    B.div (return ()) ! A.id "thing"
+    B.div (return ()) ! A.id "content"
