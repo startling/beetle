@@ -45,7 +45,7 @@ printExpression (Operator t a b) = "((" <> printExpression a <> ") "
 data Statement
   = Return Statement
   | Expression Expression
-  | Reassign Text Expression
+  | Reassign Text [Text] Expression
   | Var Text (Maybe Expression)
   deriving
   ( Eq
@@ -58,10 +58,11 @@ type Block = [Statement]
 printStatement :: Statement -> Text
 printStatement (Return e) = "return " <> printStatement e
 printStatement (Expression e) = printExpression e <> ";"
-printStatement (Reassign t e) = t <> " = " <> printExpression e <> ";"
-printStatement (Var t Nothing) = "var " <> t <> ";"
-printStatement (Var t (Just e)) = "var " <> t
+printStatement (Reassign t as e) = T.intercalate "." (t : as)
   <> " = " <> printExpression e <> ";"
+printStatement (Var t Nothing) = "var " <> t <> ";"
+printStatement (Var t (Just e)) = "var "
+  <> t <> " = " <> printExpression e <> ";"
 
 escape :: Text -> Text
 escape = T.concatMap $ \x -> case x of
