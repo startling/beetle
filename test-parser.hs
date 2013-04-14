@@ -39,7 +39,7 @@ blocks = describe "block" $ do
       [ "% do"
       , "  % y = z"
       , "% end"
-      ] `parsesTo` [Assignment "y" (Symbol "z")]
+      ] `parsesTo` [Assignment "y" [] (Symbol "z")]
   it "parses blocks with calls within" $ do
     unlines
       [ "% do"
@@ -68,7 +68,7 @@ assignments :: Spec
 assignments = describe "assignment" $ do
   let ?parser = sigil *> assignment
   it "parses simple assignment" $ do
-    "% x = y" `parsesTo` ("x", Symbol "y")
+    "% x = y" `parsesTo` Assignment "x" [] (Symbol "y")
 
 expressions :: Spec
 expressions = describe "expression" $ do
@@ -128,6 +128,8 @@ statements = describe "statement" $ do
   it "handles splices correctly" $ do
     "abc `d` e f" `parsesTo` Paragraph
       [Left "abc ", Right (Symbol "d"), Left " e f" ]
+  it "handles reassignment correctly" $ do
+    "% abc.d := d" `parsesTo` Reassignment "abc" ["d"] (Symbol "d")
 
 main :: IO ()
 main = hspec $ sequence_
