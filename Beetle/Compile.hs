@@ -55,7 +55,7 @@ statement e (B.Reassignment m as a) = Reassign (mangle m)
   (map mangle as) $ expression e a
 statement e (B.Assignment m a) = Var (mangle m) . Just $ expression e a
 statement e (B.Paragraph ts) = Expression
-  $ Call (runtime "paragraph") . return
+  $ Call (runtime "paragraph") . (e :) . return
     $ Call
       (Attribute
         (Array $ map (either Literal (expression e)) ts) "join")
