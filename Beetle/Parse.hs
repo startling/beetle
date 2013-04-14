@@ -71,7 +71,7 @@ paragraph = connect <$> sepBy1
   
 assignment :: (Monad f, TokenParsing f) => f Statement
 assignment = Assignment
-  <$> (identifier <* reassign) <*> expression
+  <$> (identifier <* assign) <*> expression
 
 reassignment :: (Monad f, TokenParsing f) => f Statement
 reassignment = uncurry Reassignment
