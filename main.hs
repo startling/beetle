@@ -23,31 +23,35 @@ import qualified Text.Blaze.Html5 as B
 import qualified Text.Blaze.Html5.Attributes as A
 -- optparse-applicative
 import Options.Applicative
+-- provided by cabal
+import Paths_beetle
 
 options :: IO (Parser (String, String, String, String))
-options = return $ (,,,)
-  <$> strOption
-     (  long "runtime"
-     <> short 'r'
-     <> metavar "file"
-     <> value "runtime.js"
-     <> help "Include an alternative Javascript runtime."
-     )
-  <*> strOption
-     (  long "style"
-     <> short 's'
-     <> metavar "file"
-     <> value "style.css"
-     <> help "Include an alternative CSS file."
-     )
-  <*> argument Just
-    (  metavar "input"
-    <> help "Beetle input file."
-    )
-  <*> argument Just
-    (  metavar "output"
-    <> help "File to output HTML to."
-    )
+options = getDataFileName "style.css" >>= \css ->
+  getDataFileName "runtime.js" >>= \js ->
+    return $ (,,,)
+    <$> strOption
+       (  long "runtime"
+       <> short 'r'
+       <> metavar "file"
+       <> value js
+       <> help "Include an alternative Javascript runtime."
+       )
+    <*> strOption
+       (  long "style"
+       <> short 's'
+       <> metavar "file"
+       <> value css
+       <> help "Include an alternative CSS file."
+       )
+    <*> argument Just
+      (  metavar "input"
+      <> help "Beetle input file."
+      )
+    <*> argument Just
+      (  metavar "output"
+      <> help "File to output HTML to."
+      )
 
 parser :: IO (ParserInfo (String, String, String, String))
 parser = options >>= \o -> return $ info (helper <*> o)

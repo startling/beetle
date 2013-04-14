@@ -41,7 +41,7 @@ build-type:          Simple
 -- Constraint on the version of Cabal needed to build this package.
 cabal-version:       >=1.8
 
-data-files:
+data-files: style.css runtime.js
 
 library
   exposed-modules:
@@ -61,7 +61,8 @@ executable beetle
   main-is: main.hs
   
   -- Modules included in this executable, other than Main.
-  -- other-modules:       
+  other-modules:
+      Paths_beetle
   
   -- Other library packages from which modules are imported.
   build-depends:
