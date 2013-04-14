@@ -49,8 +49,8 @@ block = reserved "do" *> statements where
 
 statement :: (Monad f, TokenParsing f) => f Statement
 statement = empty
-  <|> (try $ sigil *> (uncurry Assignment <$> assignment))
-  <|> (try $ sigil *> (uncurry Reassignment <$> reassignment))
+  <|> (try $ sigil *> assignment)
+  <|> (try $ sigil *> reassignment)
   <|> (try $ sigil *> (Splice <$> expression))
   <|> spaces *> (Paragraph <$> paragraph)
 
@@ -65,14 +65,17 @@ paragraph = connect <$> sepBy1
     -- concatenate adjacent Left Texts.
     connect :: [Either Text Expression] -> [Either Text Expression]
     connect [] = []
-    connect (Left a : Left b : cs) = Left (a <> b) : connect cs
+    connect (Left a : Left b : cs) = connect
+      $ Left (a <> T.singleton ' ' <> b) : cs
     connect (a : bs) = a : connect bs
   
-assignment :: (Monad m, TokenParsing m) => m (Text, Expression)
-assignment = (,) <$> identifier <* assign <*> expression
+assignment :: (Monad f, TokenParsing f) => f Statement
+assignment = Assignment
+  <$> (identifier <* reassign) <*> expression
 
-reassignment :: (Monad f, TokenParsing f) => f (Text, Expression)
-reassignment = (,) <$> identifier <* reassign <*> expression
+reassignment :: (Monad f, TokenParsing f) => f Statement
+reassignment = uncurry Reassignment
+   <$> (withAttribute identifier <* reassign) <*> expression
 
 dictionary :: (Monad m, TokenParsing m) => m [(Text, Expression)]
 dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> expression
@@ -80,9 +83,12 @@ dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> expression
 function :: (Monad m, TokenParsing m) => m Expression
 function = Fn <$> (char ':' *> identifier) <*> block
 
-withAttribute :: (Monad f, TokenParsing f) => f Expression -> f Expression
-withAttribute x = foldl Attribute <$> x
-  <*> many (char '.' *> identifier)
+withAttribute :: (Monad f, TokenParsing f) => f a -> f (a, [Text])
+withAttribute x = (,) <$> x <*>
+  (foldr (:) [] <$> many (char '.' *> identifier))
+
+withAttribute' :: (Monad f, TokenParsing f) => f Expression -> f Expression
+withAttribute' x = uncurry (foldl Attribute) <$> withAttribute x
 
 application :: (Monad f, TokenParsing f) => f Expression
 application = apply <$> expressionLine <*> commaSep1 expression where
@@ -90,10 +96,11 @@ application = apply <$> expressionLine <*> commaSep1 expression where
   apply a [] = a
 
 expression :: (Monad f, TokenParsing f) => f Expression
-expression = try application <|> withAttribute (parens expression) <|> expression'
+expression = try application
+  <|> withAttribute' (parens expression) <|> expression'
 
 expression' :: (Monad f, TokenParsing f) => f Expression
-expression' = withAttribute $
+expression' = withAttribute' $
       Symbol <$> identifier
   <|> Literal . T.pack <$> stringLiteral
   <|> Block <$> block
@@ -104,5 +111,4 @@ expressionLine :: (Monad f, TokenParsing f) => f Expression
 expressionLine = parens expression <|> runUnlined expression'
 
 dec :: (Monad f, TokenParsing f) => f Declaration
-dec = sigil *> (uncurry Declaration <$> assignment)
-
+dec = sigil *> (Declaration <$> identifier <* assign <*> expression)
