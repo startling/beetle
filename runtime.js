@@ -42,6 +42,10 @@ var beetle = {
     f(element);
   },
 
+  debug___print: function (_, x) {
+    console.log(x);
+  },
+
   $if: function (_, c) {
     return function (_, f) {
       return function (element, g) {

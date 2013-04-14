@@ -39,8 +39,8 @@ expression e (B.Symbol t) = if t `elem` functions
   then runtime t else Variable $ mangle t
   where
     functions :: [Text]
-    functions = ["paragraph", "field",
-      "link", "exec", "switch-to", "if", "#t", "#f" ]
+    functions = ["paragraph", "field", "debug-print"
+      , "link", "exec", "switch-to", "if", "#t", "#f" ]
 expression e (B.Attribute a s) = Attribute (expression e a) (mangle s)
 expression e (B.Literal t) = Literal t
 expression e (B.Call a b) = Call (expression e a) [e, expression e b]
