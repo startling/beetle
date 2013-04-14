@@ -29,7 +29,9 @@ mangle t = let m = T.concatMap each t in
   if m `elem` keywords then T.cons '$' m else m where
     each :: Char -> Text
     each c = case c of
-      '-' -> "_"; '_' -> "__"; c -> T.singleton c;
+      '-' -> "___"; '_' -> "_____";
+      '#' -> "_______";
+      c -> T.singleton c;
     
 -- | Compile a Beetle expression to a Javascript one.
 expression :: Expression -> B.Expression -> Expression

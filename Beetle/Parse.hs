@@ -33,7 +33,7 @@ idStyle :: CharParsing m => IdentifierStyle m
 idStyle = IdentifierStyle "identifier"
   (chars <|> letter) (chars <|> alphaNum)
   reserved H.Identifier H.Special where
-    chars = oneOf "-_"
+    chars = oneOf "-_#"
     reserved = fromList ["do", "end"]
 
 identifier :: (Monad f, TokenParsing f) => f Text
