@@ -5,14 +5,15 @@ import Control.Applicative
 -- trifecta
 import Text.Trifecta hiding (Parser)
 -- beetle
-import Beetle.Parse
 import Beetle.Abstract
-import Beetle.Compile
-import Language.Javascript
+import qualified Beetle.Parse as P
+import qualified Beetle.Compile as C
+import Language.Javascript (runRender, block)
 -- text
-import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
+import Data.Text.Lazy (Text)
+import qualified Data.Text.Lazy as T
+import qualified Data.Text.Lazy.IO as T
+import Data.Text.Lazy.Builder
 -- blaze-markup
 import Text.Blaze
 import Text.Blaze.Internal
@@ -67,24 +68,26 @@ main = parser >>= execParser >>=
   \(rtf, csf, inf, otf) -> do
     run <- T.readFile rtf
     css <- T.readFile csf
-    d <- parseFromFile (many dec) inf
+    d <- parseFromFile (many P.dec) inf
     e <- maybe (return []) return $ d
-    let js = T.intercalate "\n\n" . map
-         (printStatement . declaration (Variable "fuck")) $ e
+    let js = compile e
     let h = html css $ T.intercalate "\n\n" [run, js]
     writeFile "out.html" $ renderHtml h
+  where
+    compile :: [Declaration] -> Text
+    compile = toLazyText . runRender . block . C.declarations
 
 -- An html template.
 html :: Text -> Text -> Html
 html css js = B.docTypeHtml $ do
   B.head $ do
     B.meta ! A.charset "utf-8"
-    B.style ( preEscapedText css
+    B.style ( preEscapedLazyText css
       ) ! A.type_ "text/css"
     B.script (return ())
       ! A.src "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
     B.script
-      ( preEscapedText js
+      ( preEscapedLazyText js
       ) ! A.type_ "text/javascript"
   B.body $ do
     B.div (return ()) ! A.id "content"
