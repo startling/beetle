@@ -50,9 +50,12 @@ expression e (B.Dict ss) = Object (map (fmap $ expression e) ss)
 statement :: Expression -> B.Statement -> Statement
 statement e (B.Reassignment m as a) = Reassign m as $ expression e a
 statement e (B.Assignment m a) = Var m . Just $ expression e a
-statement e (B.Paragraph ts) = Expression $ Call (runtime "paragraph")
-  [ e
-  , foldr (Operator "+") (Literal "")
-     $ map (either Literal $ expression e) ts
-  ]
+statement e (B.Paragraph (t : [])) = Expression
+  $ Call (runtime "paragraph") [e, either Literal (expression e) t]
+statement e (B.Paragraph (t : ts)) = Expression
+  $ Call (runtime "paragraph")
+    [ e
+    , foldl (Operator "+") (either Literal (expression e) t)
+       $ map (either Literal $ expression e) ts
+    ]
 statement e (B.Splice x) = Expression $ expression e x
