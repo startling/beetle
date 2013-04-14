@@ -35,7 +35,8 @@ printExpression (Object ds) = "{\n    "
   <> T.intercalate "\n  , " (map line ds) <> "\n}" where
     line (a, b) = a <> " : " <> printExpression b
 printExpression (Attribute e t) = "(" <> printExpression e <> ")." <> t
-printExpression (Array _) = "[ \"todo\" ]"
+printExpression (Array as) = "[" <>
+  T.intercalate ", " (map printExpression as) <> "]"
 printExpression (Number _) = "1337"
 printExpression (Variable t) = t
 printExpression (Literal t) = "\"" <> escape t <> "\""
