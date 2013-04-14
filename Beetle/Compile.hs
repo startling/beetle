@@ -54,12 +54,10 @@ statement :: Expression -> B.Statement -> Statement
 statement e (B.Reassignment m as a) = Reassign (mangle m)
   (map mangle as) $ expression e a
 statement e (B.Assignment m a) = Var (mangle m) . Just $ expression e a
-statement e (B.Paragraph (t : [])) = Expression
-  $ Call (runtime "paragraph") [e, either Literal (expression e) t]
-statement e (B.Paragraph (t : ts)) = Expression
-  $ Call (runtime "paragraph")
-    [ e
-    , foldl (Operator "+") (either Literal (expression e) t)
-       $ map (either Literal $ expression e) ts
-    ]
+statement e (B.Paragraph ts) = Expression
+  $ Call (runtime "paragraph") . return
+    $ Call
+      (Attribute
+        (Array $ map (either Literal (expression e)) ts) "join")
+      [Literal ""]
 statement e (B.Splice x) = Expression $ expression e x
