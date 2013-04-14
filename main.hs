@@ -79,7 +79,6 @@ html :: Text -> Text -> Html
 html css js = B.docTypeHtml $ do
   B.head $ do
     B.meta ! A.charset "utf-8"
-    B.title "beetle game"
     B.style ( preEscapedText css
       ) ! A.type_ "text/css"
     B.script (return ())

@@ -1,5 +1,6 @@
 $(document).ready(function () {
   start($("#content"));
+  document.title = metadata.title;
 });
 
 var beetle = {
