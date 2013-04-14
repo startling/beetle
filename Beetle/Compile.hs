@@ -48,7 +48,7 @@ expression e (B.Dict ss) = Object (map (fmap $ expression e) ss)
 
 -- | Compile a Beetle statement to a Javascript one.
 statement :: Expression -> B.Statement -> Statement
-statement e (B.Reassignment m a) = Reassign m $ expression e a
+statement e (B.Reassignment m as a) = Reassign m as $ expression e a
 statement e (B.Assignment m a) = Var m . Just $ expression e a
 statement e (B.Paragraph ts) = Expression $ Call (runtime "paragraph")
   [ e
