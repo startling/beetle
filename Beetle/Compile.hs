@@ -13,7 +13,6 @@ declaration e (B.Declaration t a) = Var (mangle t) . Just $ expression e a
 
 -- | Create a Javascript function frxom a list of parameters and some
 -- Beetle statements.
-function :: [Text] -> [B.Statement] -> Expression
 function ps ss = Function ("element" : map mangle ps)
   . onLast Return $
     map (statement $ Variable "element") ss where
@@ -43,7 +42,7 @@ expression e (B.Attribute a s) = Attribute (expression e a) (mangle s)
 expression e (B.Literal t) = Literal t
 expression e (B.Call a b) = Call (expression e a) [e, expression e b]
 expression e (B.Block ss) = function [] ss
-expression e (B.Fn p ss) = function [p] ss
+expression e (B.Fn p ss) = function [p] [B.Splice $ B.Block ss]
 expression e (B.Dict ss) = Object
   $ map (\(a, b) -> (mangle a, expression e b)) ss
 
