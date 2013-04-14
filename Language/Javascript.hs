@@ -26,6 +26,7 @@ data Expression v
   | Object [(Text, Expression v)]
   | Attribute Text (Expression v)
   | FunctionExp (Function v)
+  | Array [Expression Text]
   | Call (Expression v) [Expression v]
   deriving
   ( Eq
@@ -113,6 +114,12 @@ expression (Call f (a : as)) = expression f
     each :: Monad m => Expression Text -> RenderT m ()
     each x = word "," >> expression x
 expression (FunctionExp f) = function f
+expression (Array as) = word "[" >> commas as >> word "]" where
+    commas :: Monad m => [Expression Text] -> RenderT m ()
+    commas [] = word ""
+    commas (a : []) = expression a
+    commas (a : as) = expression a >> forM_ as
+      (\e -> word ", " >> expression e)
 
 statement :: Monad m => Statement Text -> RenderT m ()
 statement (Assign v e) = line (word v >> word " = " >> expression e >> word ";")
@@ -135,7 +142,7 @@ function (Function ps b) = parens $ do
     commas [] = word ""
     commas (a : []) = word a
     commas (a : as) = word a >> forM_ as
-      (\e -> word "," >> word e)
+      (\e -> word ", " >> word e)
 
 runRenderT :: Monad m => RenderT m a -> m Builder
 runRenderT r = execWriterT $ runReaderT r 0
