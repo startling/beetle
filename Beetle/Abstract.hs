@@ -26,8 +26,8 @@ data Expression
 
 data Statement
   = Paragraph [Either Text Expression]
-  | Reassignment Text Expression
-  | Assignment Text Expression
+  | Reassignment Text [Text] Expression
+  | Assignment Text [Text] Expression
   | Splice Expression
   deriving
   ( Eq
