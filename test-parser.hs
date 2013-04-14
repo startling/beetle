@@ -39,7 +39,7 @@ blocks = describe "block" $ do
       [ "% do"
       , "  % y = z"
       , "% end"
-      ] `parsesTo` [Assignment "y" [] (Symbol "z")]
+      ] `parsesTo` [Assignment "y" (Symbol "z")]
   it "parses blocks with calls within" $ do
     unlines
       [ "% do"
@@ -68,7 +68,7 @@ assignments :: Spec
 assignments = describe "assignment" $ do
   let ?parser = sigil *> assignment
   it "parses simple assignment" $ do
-    "% x = y" `parsesTo` Assignment "x" [] (Symbol "y")
+    "% x = y" `parsesTo` Assignment "x" (Symbol "y")
 
 expressions :: Spec
 expressions = describe "expression" $ do
