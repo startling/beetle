@@ -4,7 +4,7 @@ $(document).ready(function () {
 });
 
 var beetle = {
-  switch_to: function (element, fn) {
+  switch___to: function (element, fn) {
     element.empty();
     fn(element);
   },
@@ -48,5 +48,9 @@ var beetle = {
         if (c) { f(element); } else { g(element); };
       }
     }
-  }
+  },
+  _______t: true,
+  _______f: false
+ 
+
 };
