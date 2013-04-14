@@ -20,7 +20,7 @@ var beetle = {
     var $text = $("<input/>", {type : "text"});
     $form.append($text);
     $form.submit(function () {
-      fn(element, $text.val());
+      fn(element, $text.val())(element);
       return false;
     });
     element.append($form);
