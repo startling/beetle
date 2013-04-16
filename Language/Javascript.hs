@@ -26,7 +26,7 @@ data Expression v
   | Object [(Text, Expression v)]
   | Attribute Text (Expression v)
   | FunctionExp (Function v)
-  | Array [Expression Text]
+  | Array [Expression v]
   | Call (Expression v) [Expression v]
   | Assign (LHS v) (Expression v)
   deriving
