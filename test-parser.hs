@@ -129,7 +129,8 @@ statements = describe "statement" $ do
     "abc `d` e f" `parsesTo` Paragraph
       [Left "abc ", Right (Symbol "d"), Left " e f" ]
   it "handles reassignment correctly" $ do
-    "% abc.d := d" `parsesTo` Reassignment "abc" ["d"] (Symbol "d")
+    "% abc.d := d" `parsesTo`
+      Reassignment (LAttribute "d" (Symbol "abc")) (Symbol "d")
 
 main :: IO ()
 main = hspec $ sequence_
