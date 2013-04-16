@@ -68,14 +68,16 @@ paragraph = connect <$> sepBy1
     connect (Left a : Left b : cs) = connect
       $ Left (a <> T.singleton ' ' <> b) : cs
     connect (a : bs) = a : connect bs
+
+lhs = (LVariable <$> identifier) <|> lattribute where
+  lattribute = expression >>= \x -> case x of
+    (Attribute e t) -> pure $ LAttribute t e; _ -> empty;
   
 assignment :: (Monad f, TokenParsing f) => f Statement
-assignment = Assignment
-  <$> (identifier <* assign) <*> expression
+assignment = Assignment <$> (identifier <* assign) <*> expression
 
 reassignment :: (Monad f, TokenParsing f) => f Statement
-reassignment = uncurry Reassignment
-   <$> (withAttribute identifier <* reassign) <*> expression
+reassignment = Reassignment <$> (lhs <* reassign) <*> expression
 
 dictionary :: (Monad m, TokenParsing m) => m [(Text, Expression)]
 dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> expression
@@ -83,12 +85,9 @@ dictionary = braces . commaSep $ (,) <$> identifier <* arrow <*> expression
 function :: (Monad m, TokenParsing m) => m Expression
 function = Fn <$> (char ':' *> identifier) <*> block
 
-withAttribute :: (Monad f, TokenParsing f) => f a -> f (a, [Text])
-withAttribute x = (,) <$> x <*>
-  (foldr (:) [] <$> many (char '.' *> identifier))
-
-withAttribute' :: (Monad f, TokenParsing f) => f Expression -> f Expression
-withAttribute' x = uncurry (foldl Attribute) <$> withAttribute x
+attributes :: (Monad m, TokenParsing m)
+  => (b -> Text -> b) -> m b -> m b
+attributes f x = foldl f <$> x <*> many (char '.' *> identifier)
 
 application :: (Monad f, TokenParsing f) => f Expression
 application = apply <$> expressionLine <*> commaSep1 expression where
@@ -96,11 +95,11 @@ application = apply <$> expressionLine <*> commaSep1 expression where
   apply a [] = a
 
 expression :: (Monad f, TokenParsing f) => f Expression
-expression = try application
-  <|> withAttribute' (parens expression) <|> expression'
+expression = try application <|> attributes Attribute
+  (parens expression) <|> expression'
 
 expression' :: (Monad f, TokenParsing f) => f Expression
-expression' = withAttribute' $
+expression' = attributes Attribute $
       Symbol <$> identifier
   <|> Literal . T.pack <$> stringLiteral
   <|> Block <$> block
