@@ -141,7 +141,7 @@ function :: Monad m => Function Text -> RenderT m ()
 function (Function ps b) = parens $ do
     word "function" >> parens (commas $ word <$> ps) >> word "{"
     newline >> indented (block b)
-    word "}"
+    indent >> word "}"
   where
     parens :: Monad m => RenderT m a -> RenderT m ()
     parens v = word "(" >> v >> word ")"
