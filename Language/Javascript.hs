@@ -81,9 +81,11 @@ type Render = RenderT Identity
 indented :: Monad m => RenderT m a -> RenderT m a
 indented = local (+ 1)
 
-line x = indent `liftM` ask >>= tell
-  >> x >> tell "\n" where
-    indent i = fromText $ T.replicate i "  "
+indent :: Monad m => RenderT m ()
+indent = ask >>= \i -> replicateM_ i (tell "  ")
+
+newline :: Monad m => RenderT m ()
+newline = word "\n"
 
 word :: Monad m => Text-> RenderT m ()
 word = tell .fromText
@@ -104,7 +106,8 @@ expression (Object o) = braces . indented $ mapM_ each o where
   braces :: Monad m => RenderT m a -> RenderT m ()
   braces b = word "({\n" >> b >> word "})"
   each :: Monad m => (Text, Expression Text) -> RenderT m ()
-  each (k, v) = line (word $ "\"" <> escape k <> "\" : ") >> expression v
+  each (k, v) = indent >> word ("\"" <> escape k <> "\" : ")
+    >> expression v >> newline
 expression (Attribute t e) = expression e >> word "." >> word t
 expression (Call f []) = expression f >> word "()"
 expression (Call f (a : as)) = expression f
@@ -122,18 +125,21 @@ expression (Array as) = word "[" >> commas as >> word "]" where
       (\e -> word ", " >> expression e)
 
 statement :: Monad m => Statement Text -> RenderT m ()
-statement (Assign v e) = line (word v >> word " = " >> expression e >> word ";")
-statement (Return e) = line (word "return " >> expression e >> word ";")
-statement (Expression e) = line (expression e >> word ";")
+statement (Assign v e) = indent >> word v >> word " = "
+  >> expression e >> word ";" >> newline
+statement (Return e) = indent >> word "return "
+  >> expression e >> word ";" >> newline
+statement (Expression e) = indent >> expression e
+  >> word ";" >> newline
 
 block :: Monad m => Block Text -> RenderT m ()
 block (Block ps ss) = forM_ ps var >> mapM_ statement ss where
-  var t = line $ word "var " >> word t >> word ";"
+  var t = indent >> word "var " >> word t >> word ";" >> newline
 
 function :: Monad m => Function Text -> RenderT m ()
 function (Function ps b) = parens $ do
-    line $ word "function" >> parens (commas $ ps) >> word " {"
-    indented $ block b
+    word "function" >> parens (commas $ ps) >> word "{"
+    newline >> indented (block b)
     word "}"
   where
     parens :: Monad m => RenderT m a -> RenderT m ()
