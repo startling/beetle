@@ -39,8 +39,8 @@ data Expression v
 
 data Statement v
   = Return (Expression v)
-  | Assign v (Expression v)
   | Expression (Expression v)
+  | Assign (Expression v) (Expression v)
   deriving
   ( Eq
   , Ord
@@ -126,7 +126,7 @@ expression (Array as) = word "["
   >> commas (expression <$> as) >> word "]"
 
 statement :: Monad m => Statement Text -> RenderT m ()
-statement (Assign v e) = indent >> word v >> word " = "
+statement (Assign v e) = indent >> expression v >> word " = "
   >> expression e >> word ";" >> newline
 statement (Return e) = indent >> word "return "
   >> expression e >> word ";" >> newline
