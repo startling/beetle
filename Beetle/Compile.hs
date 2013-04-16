@@ -29,7 +29,7 @@ block ss = Block (ss >>= locals) (last ret $ map statement ss) where
   statement (B.Reassignment l e) = Expression . Assign
     (lhs l) $ expression e where
       lhs :: B.LHS -> LHS Text
-      lhs (B.LVariable t) = LVariable $ mangle t
+      lhs (B.LSymbol t) = LVariable $ mangle t
       lhs (B.LAttribute t e) = LAttribute (mangle t) (expression e)
   statement (B.Paragraph (e : [])) = Expression
     $ Call (runtime "paragraph")

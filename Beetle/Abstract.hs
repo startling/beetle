@@ -11,7 +11,7 @@ data Declaration
   )
 
 data LHS
-  = LVariable Text
+  = LSymbol Text
   | LAttribute Text Expression
   deriving
   ( Eq
