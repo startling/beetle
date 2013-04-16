@@ -33,7 +33,7 @@ block ss = Block (ss >>= locals) (last ret $ map statement ss) where
   last :: (a -> a) -> [a] -> [a]
   last _ [] = []
   last f (b : []) = f b : []
-  last f (b : bs) = last f bs
+  last f (b : bs) = b : last f bs
   ret :: Statement a -> Statement a
   ret (Expression e) = Return e
   ret otherwise = otherwise
