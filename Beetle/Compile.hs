@@ -44,7 +44,9 @@ expression (B.Symbol t) = if t `elem` provided then
    runtime t else Variable $ mangle t
 expression (B.Literal t) = Literal t
 expression (B.Block b) = FunctionExp . Function ["element"] $ block b
-expression (B.Fn a b) = FunctionExp . Function ["element", a] $ block b
+expression (B.Fn a b) = FunctionExp . Function ["element", a]
+  . Block [] . return . Return  . FunctionExp
+  . Function ["element"] $ block b
 expression (B.Call a b) = Call (expression a) [element, expression b]
 expression (B.Dict os) = Object $ map (fmap expression) os
 expression (B.Attribute e t) = Attribute t $ expression e
