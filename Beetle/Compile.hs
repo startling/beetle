@@ -26,6 +26,9 @@ block ss = Block (ss >>= locals) (last ret $ map statement ss) where
   statement (B.Assignment t e) = Assign (Variable t) $ expression e
   statement (B.Reassignment t as e) = Assign
    (foldl (flip Attribute) (Variable t) as) $ expression e
+  statement (B.Paragraph (e : [])) = Expression
+    $ Call (runtime "paragraph")
+      [element, either Literal expression e]
   statement (B.Paragraph es) = Expression
     $ Call (runtime "paragraph")
       [element, flip Call [Literal ""] . Attribute "join" . Array
