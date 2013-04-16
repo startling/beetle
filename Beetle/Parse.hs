@@ -69,6 +69,7 @@ paragraph = connect <$> sepBy1
       $ Left (a <> T.singleton ' ' <> b) : cs
     connect (a : bs) = a : connect bs
 
+lhs :: (Monad f, TokenParsing f) => f LHS
 lhs = try lattribute <|> fmap LVariable identifier where
   lattribute = expression >>= \x -> case x of
     (Attribute e t) -> pure $ LAttribute t e; _ -> empty;
