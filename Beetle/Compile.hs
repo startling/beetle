@@ -57,7 +57,7 @@ expression (B.Fn a b) = FunctionExp . Function ["element", mangle a]
   . Function ["element"] $ block b
 expression (B.Call a b) = Call (expression a) [element, expression b]
 expression (B.Dict os) = Object $ map (fmap expression) os
-expression (B.Attribute e t) = Attribute (mangle t) $ expression e
+expression (B.Attribute t e) = Attribute (mangle t) $ expression e
 
 element :: Expression Text
 element = Variable "element"

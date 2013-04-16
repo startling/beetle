@@ -72,7 +72,7 @@ paragraph = connect <$> sepBy1
 lhs :: (Monad f, TokenParsing f) => f LHS
 lhs = try lattribute <|> fmap LSymbol identifier where
   lattribute = expression >>= \x -> case x of
-    (Attribute e t) -> pure $ LAttribute t e; _ -> empty;
+    (Attribute t e) -> pure $ LAttribute t e; _ -> empty;
   
 assignment :: (Monad f, TokenParsing f) => f Statement
 assignment = Assignment <$> (identifier <* assign) <*> expression
@@ -96,11 +96,11 @@ application = apply <$> expressionLine <*> commaSep1 expression where
   apply a [] = a
 
 expression :: (Monad f, TokenParsing f) => f Expression
-expression = try application <|> attributes Attribute
+expression = try application <|> attributes (flip Attribute)
   (parens expression) <|> expression'
 
 expression' :: (Monad f, TokenParsing f) => f Expression
-expression' = attributes Attribute $
+expression' = attributes (flip Attribute) $
       Symbol <$> identifier
   <|> Literal . T.pack <$> stringLiteral
   <|> Block <$> block

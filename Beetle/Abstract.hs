@@ -20,7 +20,7 @@ data LHS
   )
 
 data Expression
-  = Attribute Expression Text
+  = Attribute Text Expression
   | Dict [(Text, Expression)]
   | Call Expression Expression
   | Fn Text [Statement]
