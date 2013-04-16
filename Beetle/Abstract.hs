@@ -10,6 +10,15 @@ data Declaration
   , Show
   )
 
+data LHS
+  = LVariable Text
+  | LAttribute Text Expression
+  deriving
+  ( Eq
+  , Ord
+  , Show
+  )
+
 data Expression
   = Attribute Expression Text
   | Dict [(Text, Expression)]
@@ -26,7 +35,7 @@ data Expression
 
 data Statement
   = Paragraph [Either Text Expression]
-  | Reassignment Text [Text] Expression
+  | Reassignment LHS Expression
   | Assignment Text Expression
   | Splice Expression
   deriving
