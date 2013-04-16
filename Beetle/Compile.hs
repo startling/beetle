@@ -14,7 +14,8 @@ declarations es = Block (map name es) (map assign es) where
   name :: B.Declaration -> Text
   name (B.Declaration t _) = t
   assign :: B.Declaration -> Statement Text
-  assign (B.Declaration t e) = Assign (Variable t) $ expression e
+  assign (B.Declaration t e) = Expression .
+    Assign (Variable t) $ expression e
 
 -- | Compile a Beetle Block to a Javascript one.
 block :: [B.Statement] -> Block Text
@@ -23,8 +24,9 @@ block ss = Block (ss >>= locals) (last ret $ map statement ss) where
   locals otherwise = []
   statement :: B.Statement -> Statement Text
   statement (B.Splice e) = Expression $ expression e
-  statement (B.Assignment t e) = Assign (Variable t) $ expression e
-  statement (B.Reassignment t as e) = Assign
+  statement (B.Assignment t e) = Expression
+    . Assign (Variable t) $ expression e
+  statement (B.Reassignment t as e) = Expression . Assign
    (foldl (flip Attribute) (Variable t) as) $ expression e
   statement (B.Paragraph (e : [])) = Expression
     $ Call (runtime "paragraph")

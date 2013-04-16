@@ -28,6 +28,7 @@ data Expression v
   | FunctionExp (Function v)
   | Array [Expression Text]
   | Call (Expression v) [Expression v]
+  | Assign (Expression v) (Expression v)
   deriving
   ( Eq
   , Ord
@@ -40,7 +41,6 @@ data Expression v
 data Statement v
   = Return (Expression v)
   | Expression (Expression v)
-  | Assign (Expression v) (Expression v)
   deriving
   ( Eq
   , Ord
@@ -124,10 +124,10 @@ expression (Call f (a : as)) = expression f
 expression (FunctionExp f) = function f
 expression (Array as) = word "["
   >> commas (expression <$> as) >> word "]"
+expression (Assign v e) = expression v >> word " = "
+  >> expression e
 
 statement :: Monad m => Statement Text -> RenderT m ()
-statement (Assign v e) = indent >> expression v >> word " = "
-  >> expression e >> word ";" >> newline
 statement (Return e) = indent >> word "return "
   >> expression e >> word ";" >> newline
 statement (Expression e) = indent >> expression e
