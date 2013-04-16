@@ -107,12 +107,12 @@ expression :: Monad m => Expression Text -> RenderT m ()
 expression (Variable t) = word t
 expression (Literal l) = word $ "\"" <> escape l <> "\""
 expression (Object []) = word "({})"
-expression (Object o) = braces . indented $ mapM_ each o where
+expression (Object o) = braces . indented $ commas $ each <$> o where
   braces :: Monad m => RenderT m a -> RenderT m ()
-  braces b = word "({\n" >> b >> word "})"
+  braces b = word "({" >> b >> newline >> indent >> word "})"
   each :: Monad m => (Text, Expression Text) -> RenderT m ()
-  each (k, v) = indent >> word ("\"" <> escape k <> "\" : ")
-    >> expression v >> newline
+  each (k, v) = newline >> indent
+    >> word ("\"" <> escape k <> "\" : ") >> expression v
 expression (Attribute t e) = expression e >> word "." >> word t
 expression (Call f []) = expression f >> word "()"
 expression (Call f (a : as)) = expression f
