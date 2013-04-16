@@ -90,6 +90,11 @@ newline = word "\n"
 word :: Monad m => Text-> RenderT m ()
 word = tell .fromText
 
+commas :: Monad m => [RenderT m a] -> RenderT m ()
+commas [] = return ()
+commas (a : []) = a >> return ()
+commas (a : as) = a >> forM_ as (word ", " >>)
+
 escape :: Text -> Text
 escape = T.concatMap $ \x -> case x of
   '"' -> "\\\""; '\n' -> "\\n"; '\t' -> "\\t"; '\r' -> "\\r";
@@ -117,12 +122,8 @@ expression (Call f (a : as)) = expression f
     each :: Monad m => Expression Text -> RenderT m ()
     each x = word "," >> expression x
 expression (FunctionExp f) = function f
-expression (Array as) = word "[" >> commas as >> word "]" where
-    commas :: Monad m => [Expression Text] -> RenderT m ()
-    commas [] = word ""
-    commas (a : []) = expression a
-    commas (a : as) = expression a >> forM_ as
-      (\e -> word ", " >> expression e)
+expression (Array as) = word "["
+  >> commas (expression <$> as) >> word "]"
 
 statement :: Monad m => Statement Text -> RenderT m ()
 statement (Assign v e) = indent >> word v >> word " = "
@@ -138,17 +139,12 @@ block (Block ps ss) = forM_ ps var >> mapM_ statement ss where
 
 function :: Monad m => Function Text -> RenderT m ()
 function (Function ps b) = parens $ do
-    word "function" >> parens (commas $ ps) >> word "{"
+    word "function" >> parens (commas $ word <$> ps) >> word "{"
     newline >> indented (block b)
     word "}"
   where
     parens :: Monad m => RenderT m a -> RenderT m ()
     parens v = word "(" >> v >> word ")"
-    commas :: Monad m => [Text] -> RenderT m ()
-    commas [] = word ""
-    commas (a : []) = word a
-    commas (a : as) = word a >> forM_ as
-      (\e -> word ", " >> word e)
 
 runRenderT :: Monad m => RenderT m a -> m Builder
 runRenderT r = execWriterT $ runReaderT r 0
