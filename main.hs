@@ -71,7 +71,7 @@ main = parser >>= execParser >>=
     d <- parseFromFile (many P.dec) inf
     e <- maybe (return []) return $ d
     let js = compile e
-    let h = html css $ T.intercalate "\n\n" [run, js]
+    let h = html css $ "\n" <> run <> "\n\n" <> js <> "\n"
     writeFile "out.html" $ renderHtml h
   where
     compile :: [Declaration] -> Text
