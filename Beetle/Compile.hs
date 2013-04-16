@@ -70,7 +70,7 @@ runtime = flip Attribute (Variable "beetle") . mangle
 provided :: [Text]
 provided =
   [ "switch-to", "paragraph", "field"
-  , "link", "exec", "if" ]
+  , "link", "exec", "if", "#t", "#f" ]
 
 -- | Transform a valid Beetle identifier to a valid Javascript one.
 mangle :: Text -> Text
