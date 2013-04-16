@@ -69,7 +69,7 @@ paragraph = connect <$> sepBy1
       $ Left (a <> T.singleton ' ' <> b) : cs
     connect (a : bs) = a : connect bs
 
-lhs = (LVariable <$> identifier) <|> lattribute where
+lhs = try lattribute <|> fmap LVariable identifier where
   lattribute = expression >>= \x -> case x of
     (Attribute e t) -> pure $ LAttribute t e; _ -> empty;
   
