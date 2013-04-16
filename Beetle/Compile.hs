@@ -5,7 +5,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 -- beetle
 import qualified Beetle.Abstract as B
-import Language.Javascript (Expression(..)
+import Language.Javascript (Expression(..), LHS(..)
   , Statement(..), Block(..), Function(..), keywords)
 
 -- | Create a top-level Javascript declaration from a set of Beetle ones.
@@ -15,7 +15,7 @@ declarations es = Block (map name es) (map assign es) where
   name (B.Declaration t _) = t
   assign :: B.Declaration -> Statement Text
   assign (B.Declaration t e) = Expression .
-    Assign (Variable t) $ expression e
+    Assign (LVariable t) $ expression e
 
 -- | Compile a Beetle Block to a Javascript one.
 block :: [B.Statement] -> Block Text
@@ -25,9 +25,12 @@ block ss = Block (ss >>= locals) (last ret $ map statement ss) where
   statement :: B.Statement -> Statement Text
   statement (B.Splice e) = Expression $ expression e
   statement (B.Assignment t e) = Expression
-    . Assign (Variable t) $ expression e
-  statement (B.Reassignment t as e) = Expression . Assign
-   (foldl (flip Attribute) (Variable t) as) $ expression e
+    . Assign (LVariable t) $ expression e
+  statement (B.Reassignment l e) = Expression . Assign
+    (lhs l) $ expression e where
+      lhs :: B.LHS -> LHS Text
+      lhs (B.LVariable t) = LVariable $ mangle t
+      lhs (B.LAttribute t e) = LAttribute (mangle t) (expression e)
   statement (B.Paragraph (e : [])) = Expression
     $ Call (runtime "paragraph")
       [element, either Literal expression e]
