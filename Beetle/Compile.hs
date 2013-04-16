@@ -39,11 +39,12 @@ block ss = Block (ss >>= locals) (last ret $ map statement ss) where
   ret otherwise = otherwise
 
 expression :: B.Expression -> Expression Text
-expression (B.Symbol t) = Variable $ mangle t
+expression (B.Symbol t) = if t `elem` provided then
+   runtime t else Variable $ mangle t
 expression (B.Literal t) = Literal t
 expression (B.Block b) = FunctionExp . Function ["element"] $ block b
 expression (B.Fn a b) = FunctionExp . Function ["element", a] $ block b
-expression (B.Call a b) = Call (expression a) [expression b]
+expression (B.Call a b) = Call (expression a) [element, expression b]
 expression (B.Dict os) = Object $ map (fmap expression) os
 expression (B.Attribute e t) = Attribute t $ expression e
 
@@ -53,6 +54,12 @@ element = Variable "element"
 -- | An 'Expression' representing the runtime function with some name.
 runtime :: Text -> Expression Text
 runtime = flip Attribute (Variable "beetle") . mangle
+
+-- | A list of functions provided by the runtime.
+provided :: [Text]
+provided =
+  [ "switch-to", "paragraph", "field"
+  , "link", "exec", "if" ]
 
 -- | Transform a valid Beetle identifier to a valid Javascript one.
 mangle :: Text -> Text
