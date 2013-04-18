@@ -9,26 +9,26 @@ import Language.Javascript (Expression(..), LHS(..)
   , Statement(..), Block(..), Function(..), keywords)
 
 -- | Create a top-level Javascript declaration from a set of Beetle ones.
-declarations :: [B.Declaration] -> Block Text
+declarations :: [B.Declaration] -> Block Text a
 declarations es = Block (map name es) (map assign es) where
   name :: B.Declaration -> Text
   name (B.Declaration t _) = t
-  assign :: B.Declaration -> Statement Text
+  assign :: B.Declaration -> Statement Text a
   assign (B.Declaration t e) = Expression .
     Assign (LVariable t) $ expression e
 
 -- | Compile a Beetle Block to a Javascript one.
-block :: [B.Statement] -> Block Text
+block :: [B.Statement] -> Block Text a
 block ss = Block (ss >>= locals) (last ret $ map statement ss) where
   locals (B.Assignment t _) = [t]
   locals otherwise = []
-  statement :: B.Statement -> Statement Text
+  statement :: B.Statement -> Statement Text a
   statement (B.Splice e) = Expression $ expression e
   statement (B.Assignment t e) = Expression
     . Assign (LVariable t) $ expression e
   statement (B.Reassignment l e) = Expression . Assign
     (lhs l) $ expression e where
-      lhs :: B.LHS -> LHS Text
+      lhs :: B.LHS -> LHS Text a 
       lhs (B.LSymbol t) = LVariable $ mangle t
       lhs (B.LAttribute t e) = LAttribute (mangle t) (expression e)
   statement (B.Paragraph (e : [])) = Expression
@@ -43,11 +43,11 @@ block ss = Block (ss >>= locals) (last ret $ map statement ss) where
   last _ [] = []
   last f (b : []) = f b : []
   last f (b : bs) = b : last f bs
-  ret :: Statement a -> Statement a
+  ret :: Statement a b -> Statement a b
   ret (Expression e) = Return e
   ret otherwise = otherwise
 
-expression :: B.Expression -> Expression Text
+expression :: B.Expression -> Expression Text a
 expression (B.Symbol t) = if t `elem` provided then
    runtime t else Variable $ mangle t
 expression (B.Literal t) = Literal t
@@ -59,11 +59,11 @@ expression (B.Call a b) = Call (expression a) [element, expression b]
 expression (B.Dict os) = Object $ map (fmap expression) os
 expression (B.Attribute t e) = Attribute (mangle t) $ expression e
 
-element :: Expression Text
+element :: Expression Text a
 element = Variable "element"
 
 -- | An 'Expression' representing the runtime function with some name.
-runtime :: Text -> Expression Text
+runtime :: Text -> Expression Text a
 runtime = flip Attribute (Variable "beetle") . mangle
 
 -- | A list of functions provided by the runtime.
