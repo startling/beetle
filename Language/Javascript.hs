@@ -20,15 +20,16 @@ import Data.Functor.Identity
 import Control.Monad.Reader
 import Control.Monad.Writer
 
-data Expression v
+data Expression v o
   = Variable v
   | Literal Text
-  | Object [(Text, Expression v)]
-  | Attribute Text (Expression v)
-  | FunctionExp (Function v)
-  | Array [Expression v]
-  | Call (Expression v) [Expression v]
-  | Assign (LHS v) (Expression v)
+  | Object [(Text, Expression v o)]
+  | Attribute Text (Expression v o)
+  | FunctionExp (Function v o)
+  | Array [Expression v o]
+  | Call (Expression v o) [Expression v o]
+  | Assign (LHS v o) (Expression v o)
+  | Other o
   deriving
   ( Eq
   , Ord
@@ -38,9 +39,9 @@ data Expression v
   , Traversable
   )
 
-data Statement v
-  = Return (Expression v)
-  | Expression (Expression v)
+data Statement v o
+  = Return (Expression v o)
+  | Expression (Expression v o)
   deriving
   ( Eq
   , Ord
@@ -50,9 +51,9 @@ data Statement v
   , Traversable
   )
 
-data LHS v
+data LHS v o
   = LVariable v
-  | LAttribute Text (Expression v)
+  | LAttribute Text (Expression v o)
   deriving
   ( Eq
   , Ord
@@ -62,9 +63,9 @@ data LHS v
   , Traversable
   )
 
-data Block v = Block
+data Block v o = Block
   { provides   :: [v]
-  , statements :: [Statement v] }
+  , statements :: [Statement v o] }
   deriving
   ( Eq
   , Ord
@@ -74,9 +75,9 @@ data Block v = Block
   , Traversable
   )
 
-data Function v = Function
+data Function v o = Function
   { parameters :: [v]
-  , body       :: Block v
+  , body       :: Block v o
   }
   deriving
   ( Eq
@@ -115,14 +116,14 @@ escape = T.concatMap $ \x -> case x of
   c -> if isPrint c then T.singleton c
     else T.pack $ printf "\\u%04x" $ ord c
 
-expression :: Monad m => Expression Text -> RenderT m ()
+expression :: Monad m => Expression Text Text -> RenderT m ()
 expression (Variable t) = word t
 expression (Literal l) = word $ "\"" <> escape l <> "\""
 expression (Object []) = word "({})"
 expression (Object o) = braces . indented $ commas $ each <$> o where
   braces :: Monad m => RenderT m a -> RenderT m ()
   braces b = word "({" >> b >> newline >> indent >> word "})"
-  each :: Monad m => (Text, Expression Text) -> RenderT m ()
+  each :: Monad m => (Text, Expression Text Text) -> RenderT m ()
   each (k, v) = newline >> indent
     >> word ("\"" <> escape k <> "\" : ") >> expression v
 expression (Attribute t e) = expression e >> word "." >> word t
@@ -131,27 +132,28 @@ expression (Call f (a : as)) = expression f
   >> parens (expression a >> forM_ as each) where
     parens :: Monad m => RenderT m a -> RenderT m ()
     parens b = word "(" >> b >> word ")"
-    each :: Monad m => Expression Text -> RenderT m ()
+    each :: Monad m => Expression Text Text -> RenderT m ()
     each x = word "," >> expression x
 expression (FunctionExp f) = function f
 expression (Array as) = word "["
   >> commas (expression <$> as) >> word "]"
 expression (Assign v e) = lhs v >> word " = " >> expression e where
-    lhs :: Monad m => LHS Text -> RenderT m ()
+    lhs :: Monad m => LHS Text Text -> RenderT m ()
     lhs (LVariable t) = word t
     lhs (LAttribute t e) = expression e >> word "." >> word t
+expression (Other o) = word o
 
-statement :: Monad m => Statement Text -> RenderT m ()
+statement :: Monad m => Statement Text Text -> RenderT m ()
 statement (Return e) = indent >> word "return "
   >> expression e >> word ";" >> newline
 statement (Expression e) = indent >> expression e
   >> word ";" >> newline
 
-block :: Monad m => Block Text -> RenderT m ()
+block :: Monad m => Block Text Text -> RenderT m ()
 block (Block ps ss) = forM_ ps var >> mapM_ statement ss where
   var t = indent >> word "var " >> word t >> word ";" >> newline
 
-function :: Monad m => Function Text -> RenderT m ()
+function :: Monad m => Function Text Text -> RenderT m ()
 function (Function ps b) = parens $ do
     word "function" >> parens (commas $ word <$> ps) >> word "{"
     newline >> indented (block b)
