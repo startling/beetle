@@ -3,6 +3,8 @@ module Beetle.Compile where
 -- text
 import Data.Text (Text)
 import qualified Data.Text as T
+-- bitraversable
+import Data.Bifunctor
 -- beetle
 import qualified Beetle.Abstract as B
 import Language.Javascript (Expression(..), LHS(..)
@@ -81,12 +83,17 @@ block ss = Block (ss >>= locals) (last $ ss >>= statement)
     last (Expression e : []) = Return e : []
     last (a : as) = a : last as
     
-element :: Expression Text a
-element = Variable "element"
-
--- | An 'Expression' representing the runtime function with some name.
-runtime :: Text -> Expression Text a
-runtime = flip Attribute (Variable "beetle") . mangle
+transform :: Bifunctor p => p V E -> p Text (Expression Text a)
+transform = first a . second b where
+  a :: V -> Text
+  a Passing = mangle "element"
+  a (Introducing i) = mangle i
+  b :: E -> Expression Text a
+  b Element = Variable $ mangle "element"
+  b (Symbol t) = if t `elem` provided then
+    Attribute (mangle t) (Variable "beetle")
+    else Variable $ mangle t
+  b (Runtime r) = Variable $ mangle r
 
 -- | A list of functions provided by the runtime.
 provided :: [Text]
