@@ -8,7 +8,7 @@ import Text.Trifecta hiding (Parser)
 import Beetle.Abstract
 import qualified Beetle.Parse as P
 import qualified Beetle.Compile as C
-import Language.Javascript (runRender, block)
+import Language.Javascript.Render (runRender, block)
 -- text
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
