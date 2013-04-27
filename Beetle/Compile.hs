@@ -1,5 +1,7 @@
 {-# Language OverloadedStrings #-}
 module Beetle.Compile where
+-- base
+import Control.Monad
 -- text
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -8,7 +10,8 @@ import Data.Bifunctor
 -- beetle
 import qualified Beetle.Abstract as B
 import Language.Javascript (Expression(..), LHS(..)
-  , Statement(..), Block(..), Function(..), keywords)
+  , Statement(..), Block(..), Function(..), keywords
+  , overExpressions)
 
 data V
   = Passing
@@ -94,6 +97,9 @@ transform = first a . second b where
     Attribute (mangle t) (Variable "beetle")
     else Variable $ mangle t
   b (Runtime r) = Variable $ mangle r
+
+compile :: [B.Declaration] -> Block Text p
+compile = overExpressions join . transform . declarations
 
 -- | A list of functions provided by the runtime.
 provided :: [Text]
