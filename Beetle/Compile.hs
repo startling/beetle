@@ -96,7 +96,7 @@ transform = first a . second b where
   b (Symbol t) = if t `elem` provided then
     Attribute (mangle t) (Variable "beetle")
     else Variable $ mangle t
-  b (Runtime r) = Variable $ mangle r
+  b (Runtime r) = Attribute (mangle r) $ Variable "beetle"
 
 compile :: [B.Declaration] -> Block Text p
 compile = overExpressions join . transform . declarations
