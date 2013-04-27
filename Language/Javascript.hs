@@ -7,8 +7,9 @@ module Language.Javascript where
 import Control.Applicative
 import Control.Monad
 import Data.Char
-import Data.List
 import Data.Foldable (Foldable)
+import Data.List
+import Data.Monoid
 import Data.Traversable (Traversable, traverse)
 import Text.Printf
 -- transformers
@@ -156,6 +157,11 @@ data Block v o = Block
 instance HasExpression Block where
   expressions f (Block v ss) = Block v
     <$> traverse (expressions f) ss
+
+instance Monoid (Block v o) where
+  mempty = Block [] []
+  Block vs ss `mappend` Block ws ts = Block
+    (vs <> ws) (ss <> ts)
 
 instance Bifunctor Block where
   bimap = bimapDefault
