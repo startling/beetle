@@ -78,10 +78,10 @@ expressions = describe "expression" $ do
   it "parses unary application" $ do
     "% x y" `parsesTo` Call (Symbol "x") (Symbol "y")
   it "parses namespaced names correctly" $ do
-    "% hello.world" `parsesTo` Attribute (Symbol "hello") "world"
+    "% hello.world" `parsesTo` Attribute "world" (Symbol "hello")
   it "parses namedspace parenthesized things correctly" $ do
     "% (fn a).world" `parsesTo`
-      Attribute (Call (Symbol "fn") (Symbol "a")) "world"
+      Attribute "world" (Call (Symbol "fn") (Symbol "a"))
 
 functions :: Spec
 functions = describe "function" $ do
