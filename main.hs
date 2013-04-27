@@ -2,12 +2,14 @@
 -- base
 import Data.Monoid
 import Control.Applicative
+import Control.Monad
 -- trifecta
 import Text.Trifecta hiding (Parser)
 -- beetle
 import Beetle.Abstract
 import qualified Beetle.Parse as P
 import qualified Beetle.Compile as C
+import Language.Javascript (overExpressions)
 import Language.Javascript.Render (runRender, block)
 -- text
 import Data.Text.Lazy (Text)
@@ -25,7 +27,8 @@ import qualified Text.Blaze.Html5.Attributes as A
 -- optparse-applicative
 import Options.Applicative
 -- provided by cabal
-import Paths_beetle
+--import Paths_beetle
+getDataFileName = return
 
 options :: IO (Parser (String, String, String, String))
 options = getDataFileName "style.css" >>= \css ->
@@ -70,12 +73,9 @@ main = parser >>= execParser >>=
     css <- T.readFile csf
     d <- parseFromFile (many P.dec) inf
     e <- maybe (return []) return $ d
-    let js = compile e
+    let js = toLazyText . runRender . block . C.compile $ e
     let h = html css $ "\n" <> run <> "\n\n" <> js <> "\n"
     writeFile "out.html" $ renderHtml h
-  where
-    compile :: [Declaration] -> Text
-    compile = toLazyText . runRender . block . C.declarations
 
 -- An html template.
 html :: Text -> Text -> Html
