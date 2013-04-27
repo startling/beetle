@@ -1,3 +1,4 @@
+{-# Language CPP #-}
 {-# Language OverloadedStrings #-}
 -- base
 import Data.Monoid
@@ -27,7 +28,12 @@ import qualified Text.Blaze.Html5.Attributes as A
 -- optparse-applicative
 import Options.Applicative
 -- provided by cabal
+#ifdef MIN_VERSION_base(0,0,0)
 import Paths_beetle
+#else
+getDataFileName :: FilePath -> IO FilePath
+getDataFileName = return
+#endif
 
 options :: IO (Parser (String, String, String, String))
 options = getDataFileName "style.css" >>= \css ->
