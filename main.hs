@@ -27,8 +27,7 @@ import qualified Text.Blaze.Html5.Attributes as A
 -- optparse-applicative
 import Options.Applicative
 -- provided by cabal
---import Paths_beetle
-getDataFileName = return
+import Paths_beetle
 
 options :: IO (Parser (String, String, String, String))
 options = getDataFileName "style.css" >>= \css ->
