@@ -5,11 +5,14 @@
 module Language.Javascript where
 -- base
 import Control.Applicative
+import Control.Monad
 import Data.Char
 import Data.List
 import Data.Foldable (Foldable)
 import Data.Traversable (Traversable, traverse)
 import Text.Printf
+-- transformers
+import Data.Functor.Identity
 -- text 
 import Data.Text (Text)
 -- bitraversable
@@ -17,6 +20,15 @@ import Data.Bifunctor
 import Data.Bifoldable
 import Data.Bitraversable
 
+class HasExpression x where
+  expressions :: Applicative f
+    => (Expression v o -> f (Expression v p))
+    -> x v o -> f (x v p)
+
+overExpressions :: HasExpression x =>
+  (Expression v o -> Expression v p) -> x v o -> x v p
+overExpressions f = runIdentity . expressions (pure . f)
+  
 data Expression v o
   = Variable v
   | Literal Text
@@ -35,6 +47,27 @@ data Expression v o
   , Foldable
   , Traversable
   )
+
+instance HasExpression Expression where
+  expressions = id
+
+instance Applicative (Expression v) where
+  pure = return
+  (<*>) = ap
+
+instance Monad (Expression v) where
+  return = Other
+  (>>=) = (join .) . flip fmap where
+    join :: Expression v (Expression v o) -> Expression v o
+    join (Other e) = e
+    join (Variable v) = Variable v
+    join (Literal t) = Literal t
+    join (Object os) = Object $ map (fmap join) os
+    join (Attribute t e) = Attribute t $ join e
+    join (Array es) = Array $ map join es
+    join (Call e as) = Call (join e) (map join as)
+    join (Assign l e) = Assign (overExpressions join l) (join e)
+    join (FunctionExp f) = FunctionExp $ overExpressions join f
 
 instance Bifunctor Expression where
   bimap = bimapDefault
@@ -68,6 +101,10 @@ data Statement v o
   , Traversable
   )
 
+instance HasExpression Statement where
+  expressions f (Return e) = Return <$> f e
+  expressions f (Expression e) = Expression <$> f e
+
 instance Bifunctor Statement where
   bimap = bimapDefault
 
@@ -89,6 +126,10 @@ data LHS v o
   , Foldable
   , Traversable
   )
+
+instance HasExpression LHS where
+  expressions f (LVariable v) = pure $ LVariable v
+  expressions f (LAttribute t e) = LAttribute t <$> f e
 
 instance Bifunctor LHS where
   bimap = bimapDefault
@@ -112,6 +153,10 @@ data Block v o = Block
   , Traversable
   )
 
+instance HasExpression Block where
+  expressions f (Block v ss) = Block v
+    <$> traverse (expressions f) ss
+
 instance Bifunctor Block where
   bimap = bimapDefault
 
@@ -134,6 +179,9 @@ data Function v o = Function
   , Foldable
   , Traversable
   )
+
+instance HasExpression Function where
+  expressions f (Function ps b) = Function ps <$> expressions f b
 
 instance Bifunctor Function where
   bimap = bimapDefault
