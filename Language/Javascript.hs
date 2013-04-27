@@ -113,7 +113,7 @@ instance Bifoldable Statement where
 
 instance Bitraversable Statement where
   bitraverse f g (Return e) = Return <$> bitraverse f g e
-  bitraverse f g (Expression e) = Return <$> bitraverse f g e
+  bitraverse f g (Expression e) = Expression <$> bitraverse f g e
 
 data LHS v o
   = LVariable v
