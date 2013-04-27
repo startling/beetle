@@ -45,7 +45,8 @@ declarations es = Block (map name es) (map assign es) where
 expression :: B.Expression -> Expression V E
 expression (B.Attribute t e) = Attribute t $ expression e
 expression (B.Dict os) = Object $ map (fmap expression) os
-expression (B.Call e a) = Call (expression e) (return $ expression a)
+expression (B.Call e a) = Call (expression e)
+  [Other Element, expression a]
 expression (B.Fn t ss) = FunctionExp . Function [Passing, Introducing t]
   . Block [] . return . Return . FunctionExp
   . Function [Passing] $ block ss
@@ -63,7 +64,7 @@ statement (B.Reassignment l e) = return . Expression
     lhs (B.LSymbol t) = LVariable $ Introducing t
     lhs (B.LAttribute t e) = LAttribute t $ expression e
 statement (B.Paragraph []) = return . Expression
-  . Call (Other $ Runtime "paragraph") $ [Literal ""]
+  . Call (Other $ Runtime "paragraph") $ [Other Element, Literal ""]
 statement (B.Paragraph (e : [])) = return . Expression
   $ Call (Other $ Runtime "paragraph")
      [Other Element, either Literal expression e]
