@@ -35,10 +35,10 @@ getDataFileName :: FilePath -> IO FilePath
 getDataFileName = return
 #endif
 
-options :: IO (Parser (String, String, String, String))
+options :: IO (Parser (String, String, String, String, String))
 options = getDataFileName "style.css" >>= \css ->
   getDataFileName "runtime.js" >>= \js ->
-    return $ (,,,)
+    return $ (,,,,)
     <$> strOption
        (  long "runtime"
        <> short 'r'
@@ -61,8 +61,15 @@ options = getDataFileName "style.css" >>= \css ->
       (  metavar "output"
       <> help "File to output HTML to."
       )
+    <*> strOption
+      (  long "jquery"
+      <> short 'q'
+      <> metavar "filename"
+      <> value "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
+      <> help "JQuery source file to reference; defaults to Google's CDN."
+      )
 
-parser :: IO (ParserInfo (String, String, String, String))
+parser :: IO (ParserInfo (String, String, String, String, String))
 parser = options >>= \o -> return $ info (helper <*> o)
   (  progDesc "Compile Beetle files to Javascript."
   <> header "beetlec - compiler for the Beetle language."
@@ -73,24 +80,24 @@ parser = options >>= \o -> return $ info (helper <*> o)
 -- and write it out as a single html file.
 main :: IO ()
 main = parser >>= execParser >>=
-  \(rtf, csf, inf, otf) -> do
+  \(rtf, csf, inf, otf, jqf) -> do
     run <- T.readFile rtf
     css <- T.readFile csf
     d <- parseFromFile (many P.dec) inf
     e <- maybe (return []) return $ d
     let js = toLazyText . runRender . block . C.compile $ e
-    let h = html css $ "\n" <> run <> "\n\n" <> js <> "\n"
+    let h = html jqf css $ "\n" <> run <> "\n\n" <> js <> "\n"
     writeFile "out.html" $ renderHtml h
 
 -- An html template.
-html :: Text -> Text -> Html
-html css js = B.docTypeHtml $ do
+html :: String -> Text -> Text -> Html
+html jq css js = B.docTypeHtml $ do
   B.head $ do
     B.meta ! A.charset "utf-8"
     B.style ( preEscapedLazyText css
       ) ! A.type_ "text/css"
     B.script (return ())
-      ! A.src "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
+      ! A.src (stringValue jq)
     B.script
       ( preEscapedLazyText js
       ) ! A.type_ "text/javascript"
