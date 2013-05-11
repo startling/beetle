@@ -7,6 +7,7 @@ module Language.Javascript where
 import Control.Applicative
 import Control.Monad
 import Data.Char
+import Data.String
 import Data.Foldable (Foldable)
 import Data.List
 import Data.Monoid
@@ -31,7 +32,10 @@ overExpressions :: HasExpression x =>
 overExpressions f = runIdentity . expressions (pure . f)
   
 data Expression v o
-  = Variable v
+  = Null
+  | This
+  | Boolean Bool
+  | Variable v
   | Literal Text
   | Object [(Text, Expression v o)]
   | Attribute Text (Expression v o)
@@ -60,6 +64,9 @@ instance Monad (Expression v) where
   return = Other
   (>>=) = (join .) . flip fmap where
     join :: Expression v (Expression v o) -> Expression v o
+    join Null = Null
+    join This = This
+    join (Boolean b) = Boolean b
     join (Other e) = e
     join (Variable v) = Variable v
     join (Literal t) = Literal t
@@ -77,6 +84,9 @@ instance Bifoldable Expression where
   bifoldMap = bifoldMapDefault
 
 instance Bitraversable Expression where
+  bitraverse _ _ Null = pure Null
+  bitraverse _ _ This = pure This
+  bitraverse _ _ (Boolean b) = pure (Boolean b)
   bitraverse f g (Variable v) = Variable <$> f v
   bitraverse _ _ (Literal t) = pure $ Literal t
   bitraverse f g (Object os) = Object <$> traverse
@@ -199,7 +209,7 @@ instance Bitraversable Function where
   bitraverse f g (Function ps b) = Function <$> traverse f ps
     <*> bitraverse f g b
 
-keywords :: [Text]
+keywords :: IsString a => [a]
 keywords =
   [ "break"
   , "case"
