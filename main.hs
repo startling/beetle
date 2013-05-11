@@ -53,6 +53,13 @@ options = getDataFileName "style.css" >>= \css ->
        <> value css
        <> help "Include an alternative CSS file."
        )
+    <*> strOption
+      (  long "jquery"
+      <> short 'q'
+      <> metavar "filename"
+      <> value "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
+      <> help "JQuery source file to reference; defaults to Google's CDN."
+      )
     <*> argument Just
       (  metavar "input"
       <> help "Beetle input file."
@@ -60,13 +67,6 @@ options = getDataFileName "style.css" >>= \css ->
     <*> argument Just
       (  metavar "output"
       <> help "File to output HTML to."
-      )
-    <*> strOption
-      (  long "jquery"
-      <> short 'q'
-      <> metavar "filename"
-      <> value "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
-      <> help "JQuery source file to reference; defaults to Google's CDN."
       )
 
 parser :: IO (ParserInfo (String, String, String, String, String))
@@ -80,7 +80,7 @@ parser = options >>= \o -> return $ info (helper <*> o)
 -- and write it out as a single html file.
 main :: IO ()
 main = parser >>= execParser >>=
-  \(rtf, csf, inf, otf, jqf) -> do
+  \(rtf, csf, jqf, inf, otf) -> do
     run <- T.readFile rtf
     css <- T.readFile csf
     d <- parseFromFile (many P.dec) inf
