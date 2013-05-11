@@ -56,7 +56,7 @@ options = getDataFileName "style.css" >>= \css ->
     <*> strOption
       (  long "jquery"
       <> short 'q'
-      <> metavar "filename"
+      <> metavar "url"
       <> value "https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
       <> help "JQuery source file to reference; defaults to Google's CDN."
       )
